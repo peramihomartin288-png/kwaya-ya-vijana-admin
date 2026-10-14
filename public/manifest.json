@@ -1,0 +1,13 @@
+{
+  "name": "KMCA Admin",
+  "short_name": "KMCA Admin",
+  "description": "Admin panel ya Kwaya ya Vijana ya Mtakatifu Carlo Acutis",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#9333ea",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

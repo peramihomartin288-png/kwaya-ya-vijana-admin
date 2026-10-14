@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6b21a8"/>
+      <stop offset="100%" stop-color="#9333ea"/>
+    </linearGradient>
+    <linearGradient id="crownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="3" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#bgGrad)"/>
+
+  <!-- Crown -->
+  <g transform="translate(256, 130)" filter="url(#shadow)">
+    <!-- Base -->
+    <rect x="-90" y="30" width="180" height="30" rx="8" fill="url(#crownGrad)"/>
+    <!-- Main body -->
+    <path d="M -90 30 L -90 0 L -55 25 L -25 -20 L 0 10 L 25 -20 L 55 25 L 90 0 L 90 30 Z"
+          fill="url(#crownGrad)" stroke="#b45309" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Jewels -->
+    <circle cx="-55" cy="20" r="7" fill="#ef4444"/>
+    <circle cx="0" cy="20" r="7" fill="#3b82f6"/>
+    <circle cx="55" cy="20" r="7" fill="#22c55e"/>
+    <circle cx="-25" cy="5" r="5" fill="#f472b6"/>
+    <circle cx="25" cy="5" r="5" fill="#f472b6"/>
+  </g>
+
+  <!-- KMCA -->
+  <text x="256" y="330" font-family="Arial, sans-serif" font-size="110" font-weight="900"
+        fill="#ffffff" text-anchor="middle" letter-spacing="4">KMCA</text>
+
+  <!-- Admin -->
+  <text x="256" y="385" font-family="Arial, sans-serif" font-size="42" font-weight="600"
+        fill="#fde047" text-anchor="middle" letter-spacing="8">ADMIN</text>
+
+  <!-- Decorative lines -->
+  <line x1="120" y1="410" x2="200" y2="410" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+  <line x1="312" y1="410" x2="392" y2="410" stroke="#fde047" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="256" cy="410" r="5" fill="#fde047"/>
+</svg>

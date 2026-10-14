@@ -1,0 +1,42 @@
+:root {
+  /* Rangi */
+  --color-primary: #6b21a8;
+  --color-primary-light: #9333ea;
+  --color-primary-dark: #4c1d95;
+  --color-secondary: #f59e0b;
+  --color-bg: #0f0f1a;
+  --color-bg-light: #1a1a2e;
+  --color-bg-card: #16213e;
+  --color-text: #ffffff;
+  --color-text-muted: #a0a0b0;
+  --color-border: #2a2a4a;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  /* Fonts */
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+
+  /* Transition */
+  --transition: 0.25s ease;
+}
