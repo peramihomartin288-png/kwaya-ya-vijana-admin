@@ -12,17 +12,17 @@ services:
       - key: NODE_ENV
         value: production
       - key: VITE_SUPABASE_URL
-        sync: false
+        value: https://myusyrzjrlyhiaxqpsxr.supabase.co
       - key: VITE_SUPABASE_ANON_KEY
-        sync: false
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im15dXN5cnpqcmx5aGlheHFwc3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MTU5OTYsImV4cCI6MjEwNzQ5MTk5Nn0.qT9KyaZRkFiqsQnN7-yBlQuMTDl-XOTgzBceHtywMgM
       - key: VITE_VAPID_PUBLIC_KEY
-        sync: false
+        value: BNjNACmP0NaUTw3tE9VKAh9gcm9lTfVNpYy_QG_QjibQYnz_AGao8V_JhAMGpH4g_Zy0mzSbiTXQvERZFzXVs24
       - key: VITE_CLOUDINARY_CLOUD
-        sync: false
+        value: dcgwq5lv
       - key: VITE_CLOUDINARY_PRESET
-        sync: false
+        value: Kwayayavijana
       - key: VITE_CLOUDINARY_FOLDER
-        sync: false
+        value: Kmca
     routes:
       - type: rewrite
         source: /*
