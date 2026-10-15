@@ -5,6 +5,7 @@ import Modal from '../../components/Modal';
 import Table from '../../components/Table';
 import MediaPicker from '../../components/MediaPicker';
 import { listMatukio, createMatukio, updateMatukio, deleteMatukio } from '../../lib/matukio';
+import { thumbUrl } from '../../lib/cloudinary';
 import '../../styles/pages/watakatifu.css';
 
 const emptyForm = {
@@ -30,7 +31,6 @@ export default function Matukio() {
   useEffect(() => { load(); }, []);
 
   function set(f, v) { setForm((x) => ({ ...x, [f]: v })); }
-
   function openNew() { setEditing(null); setForm(emptyForm); setError(''); setModalOpen(true); }
   function openEdit(r) { setEditing(r); setForm({ ...emptyForm, ...r }); setError(''); setModalOpen(true); }
 
@@ -51,6 +51,9 @@ export default function Matukio() {
   }
 
   const columns = [
+    { key: 'picha', label: '', width: 60, render: (r) => r.picha
+      ? <img src={thumbUrl(r.picha, 80)} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover' }} />
+      : '—' },
     { key: 'jina', label: 'Jina' },
     { key: 'tarehe_kuanza', label: 'Tarehe', width: 160, render: (r) => r.tarehe_kuanza ? new Date(r.tarehe_kuanza).toLocaleString() : '—' },
     { key: 'mahali', label: 'Mahali', width: 140 },

@@ -4,10 +4,8 @@ import Input from '../../components/Input';
 import Modal from '../../components/Modal';
 import Table from '../../components/Table';
 import MediaPicker from '../../components/MediaPicker';
-import Loader from '../../components/Loader';
-import {
-  listWatakatifu, createWatakatifu, updateWatakatifu, deleteWatakatifu,
-} from '../../lib/watakatifu';
+import { listWatakatifu, createWatakatifu, updateWatakatifu, deleteWatakatifu } from '../../lib/watakatifu';
+import { thumbUrl } from '../../lib/cloudinary';
 import '../../styles/pages/watakatifu.css';
 
 const emptyForm = {
@@ -40,6 +38,10 @@ export default function Watakatifu() {
   }
 
   useEffect(() => { load(); }, []);
+
+  function set(field, value) {
+    setForm((f) => ({ ...f, [field]: value }));
+  }
 
   function openNew() {
     setEditing(null);
@@ -99,7 +101,11 @@ export default function Watakatifu() {
     {
       key: 'picha', label: 'Picha', width: 80,
       render: (r) => r.picha
-        ? <img src={r.picha} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
+        ? <img
+            src={thumbUrl(r.picha, 80)}
+            alt=""
+            style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }}
+          />
         : '—',
     },
     {
@@ -146,14 +152,14 @@ export default function Watakatifu() {
           label="Tarehe"
           type="date"
           value={form.tarehe}
-          onChange={(v) => setForm({ ...form, tarehe: v })}
+          onChange={(v) => set('tarehe', v)}
           required
         />
 
         <Input
           label="Jina la Mtakatifu"
           value={form.jina}
-          onChange={(v) => setForm({ ...form, jina: v })}
+          onChange={(v) => set('jina', v)}
           placeholder="Mfano: Mtakatifu Martin"
           required
         />
@@ -162,7 +168,7 @@ export default function Watakatifu() {
           label="Picha"
           type="image"
           value={form.picha}
-          onChange={(v) => setForm({ ...form, picha: v })}
+          onChange={(v) => set('picha', v)}
         />
 
         <Input
@@ -170,7 +176,7 @@ export default function Watakatifu() {
           type="textarea"
           rows={4}
           value={form.history}
-          onChange={(v) => setForm({ ...form, history: v })}
+          onChange={(v) => set('history', v)}
         />
 
         <Input
@@ -178,7 +184,7 @@ export default function Watakatifu() {
           type="textarea"
           rows={3}
           value={form.miujiza}
-          onChange={(v) => setForm({ ...form, miujiza: v })}
+          onChange={(v) => set('miujiza', v)}
         />
 
         <Input
@@ -186,7 +192,7 @@ export default function Watakatifu() {
           type="textarea"
           rows={3}
           value={form.sala}
-          onChange={(v) => setForm({ ...form, sala: v })}
+          onChange={(v) => set('sala', v)}
         />
 
         <div className="checkbox-row">
@@ -194,7 +200,7 @@ export default function Watakatifu() {
             type="checkbox"
             id="pub"
             checked={form.published}
-            onChange={(e) => setForm({ ...form, published: e.target.checked })}
+            onChange={(e) => set('published', e.target.checked)}
           />
           <label htmlFor="pub">Chapisha kwa watumiaji</label>
         </div>

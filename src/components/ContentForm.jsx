@@ -5,6 +5,7 @@ import Modal from './Modal';
 import Table from './Table';
 import MediaPicker from './MediaPicker';
 import { listContent, createContent, updateContent, deleteContent } from '../lib/content';
+import { thumbUrl } from '../lib/cloudinary';
 import '../styles/pages/watakatifu.css';
 
 export default function ContentForm({ type, title, icon, mediaCount = 1, withMusic = false }) {
@@ -27,14 +28,8 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
 
   useEffect(() => { load(); }, [type]);
 
-  function set(field, value) {
-    setForm((f) => ({ ...f, [field]: value }));
-  }
-
-  function setMedia(field, value) {
-    setForm((f) => ({ ...f, media: { ...f.media, [field]: value } }));
-  }
-
+  function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
+  function setMedia(field, value) { setForm((f) => ({ ...f, media: { ...f.media, [field]: value } })); }
   function setMediaUrl(index, value) {
     const urls = [...(form.media.urls || [])];
     urls[index] = value;
@@ -74,7 +69,7 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
     setForm({
       head: row.head || '',
       description: row.description || '',
-      media: row.media || { urls: [''] },
+      media: row.media || (isMulti ? { urls: [''] } : { url: '' }),
       published: row.published || false,
     });
     setError('');
@@ -100,9 +95,7 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
     setSaving(true);
     try {
       const cleanMedia = { ...form.media };
-      if (isMulti && cleanMedia.urls) {
-        cleanMedia.urls = cleanMedia.urls.filter(Boolean);
-      }
+      if (isMulti && cleanMedia.urls) cleanMedia.urls = cleanMedia.urls.filter(Boolean);
 
       const payload = {
         head: form.head,
@@ -129,13 +122,13 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
     if (isMulti) {
       const url = row.media?.urls?.[0];
       return url
-        ? <img src={url} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
+        ? <img src={thumbUrl(url, 80)} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
         : '—';
     }
     if (isVideo) return '🎬';
     const url = row.media?.url;
     return url
-      ? <img src={url} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
+      ? <img src={thumbUrl(url, 80)} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
       : '—';
   }
 
@@ -189,17 +182,10 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
         <Input label="Kichwa" value={form.head} onChange={(v) => set('head', v)} required />
         <Input label="Maelezo" type="textarea" rows={3} value={form.description} onChange={(v) => set('description', v)} />
 
-        {/* Picha Moja */}
         {!isMulti && !isVideo && (
-          <MediaPicker
-            label="Picha"
-            type="image"
-            value={form.media.url || ''}
-            onChange={(v) => setMedia('url', v)}
-          />
+          <MediaPicker label="Picha" type="image" value={form.media.url || ''} onChange={(v) => setMedia('url', v)} />
         )}
 
-        {/* Picha Nyingi (Unlimited) */}
         {isMulti && (
           <div>
             <div className="form-section-title" style={{ marginTop: 8 }}>Picha</div>
@@ -212,57 +198,24 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
                   onChange={(v) => setMediaUrl(i, v)}
                 />
                 {(form.media.urls || []).length > 1 && (
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => removeImage(i)}
-                    type="button"
-                  >
-                    🗑️ Ondoa
-                  </Button>
+                  <Button size="sm" variant="danger" onClick={() => removeImage(i)} type="button">🗑️ Ondoa</Button>
                 )}
               </div>
             ))}
-
-            <Button
-              variant="secondary"
-              onClick={addImage}
-              type="button"
-              icon="➕"
-              fullWidth
-            >
-              Ongeza Picha
-            </Button>
+            <Button variant="secondary" onClick={addImage} type="button" icon="➕" fullWidth>Ongeza Picha</Button>
           </div>
         )}
 
-        {/* Video */}
         {isVideo && (
-          <MediaPicker
-            label="Video"
-            type="video"
-            value={form.media.url || ''}
-            onChange={(v) => setMedia('url', v)}
-          />
+          <MediaPicker label="Video" type="video" value={form.media.url || ''} onChange={(v) => setMedia('url', v)} />
         )}
 
-        {/* Background Music */}
         {withMusic && (
-          <MediaPicker
-            label="Background Music"
-            type="audio"
-            value={form.media.music || ''}
-            onChange={(v) => setMedia('music', v)}
-          />
+          <MediaPicker label="Background Music" type="audio" value={form.media.music || ''} onChange={(v) => setMedia('music', v)} />
         )}
 
         <div className="checkbox-row">
-          <input
-            type="checkbox"
-            id="pub"
-            checked={form.published}
-            onChange={(e) => set('published', e.target.checked)}
-          />
+          <input type="checkbox" id="pub" checked={form.published} onChange={(e) => set('published', e.target.checked)} />
           <label htmlFor="pub">Chapisha kwa watumiaji</label>
         </div>
       </Modal>

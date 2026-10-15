@@ -23,12 +23,11 @@ async function track(event, value) {
       'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ visitor_id, event, value }),
+    body: JSON.stringify({ visitor_id, event, value, is_admin: true }),
   });
 }
 
 export default function PermissionSlide({ onDone }) {
-  // Angalia hali halisi ya browser
   const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
   const pwaInstalled = window.matchMedia('(display-mode: standalone)').matches;
 
@@ -91,14 +90,8 @@ export default function PermissionSlide({ onDone }) {
   async function installPWA() {
     window.dispatchEvent(new Event('trigger-install'));
     await track('pwa');
-    // Angalia kama amesakinisha
-    setTimeout(() => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        onDone?.();
-      } else {
-        onDone?.(); // funga hata kama hakusakinisha (anaweza kurudi)
-      }
-    }, 500);
+    localStorage.setItem('perm_pwa_done', '1');
+    onDone?.();
   }
 
   function skip() {

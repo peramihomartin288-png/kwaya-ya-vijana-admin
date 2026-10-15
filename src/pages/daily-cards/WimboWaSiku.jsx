@@ -5,6 +5,7 @@ import Modal from '../../components/Modal';
 import Table from '../../components/Table';
 import MediaPicker from '../../components/MediaPicker';
 import { listWimbo, createWimbo, updateWimbo, deleteWimbo } from '../../lib/wimbo';
+import { thumbUrl } from '../../lib/cloudinary';
 import '../../styles/pages/watakatifu.css';
 
 const emptyForm = {
@@ -73,7 +74,10 @@ export default function WimboWaSiku() {
   const columns = [
     { key: 'tarehe', label: 'Tarehe', width: 120 },
     { key: 'jina', label: 'Jina' },
-    { key: 'media_type', label: 'Aina', width: 90 },
+    {
+      key: 'media', label: 'Aina', width: 90,
+      render: (r) => r.media_type === 'video' ? '🎬 Video' : '🎵 Audio',
+    },
     {
       key: 'published', label: 'Hali', width: 100,
       render: (r) => r.published

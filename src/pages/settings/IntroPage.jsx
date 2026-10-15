@@ -4,6 +4,7 @@ import Input from '../../components/Input';
 import MediaPicker from '../../components/MediaPicker';
 import Loader from '../../components/Loader';
 import { getIntro, saveIntro } from '../../lib/settings';
+import { thumbUrl } from '../../lib/cloudinary';
 import '../../styles/pages/watakatifu.css';
 
 const emptyForm = {
@@ -80,24 +81,16 @@ export default function IntroPage() {
         />
       </div>
 
-      {/* Preview */}
       <div className="form-section">
         <div className="form-section-title">Onyesho</div>
         <div style={{
           background: form.rangi_msingi,
           color: form.rangi_maandishi,
-          borderRadius: 12,
-          padding: 40,
-          textAlign: 'center',
-          minHeight: 200,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 16,
+          borderRadius: 12, padding: 40, textAlign: 'center', minHeight: 200,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16,
         }}>
           {form.logo ? (
-            <img src={form.logo} alt="logo" style={{ width: 80, height: 80, objectFit: 'contain' }} />
+            <img src={thumbUrl(form.logo, 200)} alt="logo" style={{ width: 80, height: 80, objectFit: 'contain' }} />
           ) : (
             <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700 }}>
               K

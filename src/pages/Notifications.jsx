@@ -3,9 +3,28 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Modal from '../components/Modal';
 import Table from '../components/Table';
-import Loader from '../components/Loader';
 import { supabase } from '../lib/supabase';
 import '../styles/pages/watakatifu.css';
+
+const typeLabels = {
+  new_user: 'User Mpya',
+  new_content: 'Post Mpya',
+  new_daily_card: 'Daily Card',
+  daily_card_missing: 'Daily Card Inakosekana',
+  reminder: 'Reminder',
+  live_start: 'Live',
+  general: 'Ujumbe',
+};
+
+const typeColors = {
+  new_user: '#4ade80',
+  new_content: '#9333ea',
+  new_daily_card: '#60a5fa',
+  daily_card_missing: '#f59e0b',
+  reminder: '#fbbf24',
+  live_start: '#ef4444',
+  general: '#a0a0b0',
+};
 
 export default function Notifications() {
   const [tab, setTab] = useState('activity');
@@ -44,8 +63,22 @@ export default function Notifications() {
 
   useEffect(() => { load(); }, []);
 
+  const unreadCount = activities.filter((a) => !a.read).length;
+
+  useEffect(() => {
+    if ('setAppBadge' in navigator) {
+      if (unreadCount > 0) navigator.setAppBadge(unreadCount).catch(() => {});
+      else navigator.clearAppBadge().catch(() => {});
+    }
+  }, [unreadCount]);
+
   async function markRead(id) {
     await supabase.from('admin_notifications').update({ read: true }).eq('id', id);
+    await loadActivities();
+  }
+
+  async function markAllRead() {
+    await supabase.from('admin_notifications').update({ read: true }).eq('read', false);
     await loadActivities();
   }
 
@@ -75,7 +108,7 @@ export default function Notifications() {
       );
       const data = await res.json();
       if (data.ok) {
-        setMsg(`Imetumwa ✅ (${data.sent || 0} vifaa)`);
+        setMsg(`Imetumwa (${data.sent || 0} vifaa)`);
         setForm({ visitor_id: '', title: '', body: '' });
         setTimeout(() => { setSendOpen(false); setMsg(''); }, 2000);
       } else {
@@ -92,8 +125,23 @@ export default function Notifications() {
       key: 'read', label: '', width: 40,
       render: (r) => r.read ? '✅' : <span style={{ color: '#fbbf24' }}>●</span>,
     },
+    {
+      key: 'type', label: 'Aina', width: 160,
+      render: (r) => (
+        <span style={{
+          fontSize: '0.7rem',
+          padding: '2px 8px',
+          borderRadius: 999,
+          background: `${typeColors[r.type] || '#666'}22`,
+          color: typeColors[r.type] || '#a0a0b0',
+          whiteSpace: 'nowrap',
+        }}>
+          {typeLabels[r.type] || r.type || 'Ujumbe'}
+        </span>
+      ),
+    },
     { key: 'title', label: 'Kichwa' },
-    { key: 'body', label: 'Maelezo', render: (r) => (r.body || '').slice(0, 40) },
+    { key: 'body', label: 'Maelezo', render: (r) => (r.body || '').slice(0, 50) },
     {
       key: 'created_at', label: 'Muda', width: 160,
       render: (r) => new Date(r.created_at).toLocaleString(),
@@ -146,15 +194,26 @@ export default function Notifications() {
   return (
     <div>
       <div className="page-header">
-        <h2>🔔 Notifications</h2>
-        <Button onClick={() => setSendOpen(true)} icon="📨">Tuma kwa User</Button>
+        <h2>🔔 Notifications {unreadCount > 0 && <span className="badge badge-green">{unreadCount}</span>}</h2>
+        <div className="page-actions">
+          {unreadCount > 0 && (
+            <Button variant="ghost" onClick={markAllRead} icon="✅">Soma Zote</Button>
+          )}
+          <Button onClick={() => setSendOpen(true)} icon="📨">Tuma kwa User</Button>
+        </div>
       </div>
 
       <div className="media-tabs" style={{ marginBottom: 16 }}>
-        <button className={`media-tab ${tab === 'activity' ? 'active' : ''}`} onClick={() => setTab('activity')}>
-          📊 Activity ({activities.filter(a => !a.read).length})
+        <button
+          className={`media-tab ${tab === 'activity' ? 'active' : ''}`}
+          onClick={() => setTab('activity')}
+        >
+          📊 Activity ({unreadCount})
         </button>
-        <button className={`media-tab ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>
+        <button
+          className={`media-tab ${tab === 'users' ? 'active' : ''}`}
+          onClick={() => setTab('users')}
+        >
           👥 Watumiaji ({users.length})
         </button>
       </div>

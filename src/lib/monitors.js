@@ -15,3 +15,7 @@ async function call(fn) {
 export async function getSupabaseUsage() {
   return call('get-supabase-usage');
 }
+
+export async function getCloudinaryUsage() {
+  return call('get-cloudinary-usage');
+}

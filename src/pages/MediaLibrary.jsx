@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Button from '../components/Button';
 import Loader from '../components/Loader';
 import { listMedia, saveMedia, deleteMedia } from '../lib/media';
-import { uploadToCloudinary } from '../lib/cloudinary';
+import { uploadToCloudinary, thumbUrl, fullUrl, videoUrl, audioUrl } from '../lib/cloudinary';
 import '../styles/pages/media-library.css';
 
 export default function MediaLibrary() {
@@ -37,7 +37,7 @@ export default function MediaLibrary() {
   }
 
   async function handleDelete(item) {
-    if (!confirm('Futa kutoka maktaba? (Cloudinary bado itabaki)')) return;
+    if (!confirm('Futa kutoka maktaba?')) return;
     try { await deleteMedia(item.id); await load(); }
     catch (e) { alert(e.message); }
   }
@@ -102,8 +102,8 @@ export default function MediaLibrary() {
           {filtered.map((m) => (
             <div key={m.id} className="media-item">
               <div className="media-item-preview" onClick={() => setPreview(m)}>
-                {m.type === 'image' && <img src={m.url} alt="" loading="lazy" />}
-                {m.type === 'video' && <video src={m.url} muted />}
+                {m.type === 'image' && <img src={thumbUrl(m.url, 300)} alt="" loading="lazy" />}
+                {m.type === 'video' && <video src={videoUrl(m.url)} muted />}
                 {m.type === 'audio' && <div className="media-audio-icon">🎵</div>}
               </div>
               <div className="media-item-info">
@@ -120,14 +120,13 @@ export default function MediaLibrary() {
         </div>
       )}
 
-      {/* Preview Modal */}
       {preview && (
         <div className="media-preview-overlay" onClick={() => setPreview(null)}>
           <div className="media-preview-modal" onClick={(e) => e.stopPropagation()}>
             <button className="media-preview-close" onClick={() => setPreview(null)}>✕</button>
-            {preview.type === 'image' && <img src={preview.url} alt="" />}
-            {preview.type === 'video' && <video src={preview.url} controls autoPlay />}
-            {preview.type === 'audio' && <audio src={preview.url} controls autoPlay />}
+            {preview.type === 'image' && <img src={fullUrl(preview.url, 1080)} alt="" />}
+            {preview.type === 'video' && <video src={videoUrl(preview.url)} controls autoPlay />}
+            {preview.type === 'audio' && <audio src={audioUrl(preview.url)} controls autoPlay />}
             <div className="media-preview-url">
               <code>{preview.url}</code>
               <Button size="sm" onClick={() => copyUrl(preview.url)}>📋 Nakili</Button>
