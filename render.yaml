@@ -2,13 +2,9 @@ services:
   - type: web
     name: kmca-admin
     runtime: static
-    buildCommand: npm install --prefer-offline --no-audit --no-fund && npm run build
+    buildCommand: npm install --legacy-peer-deps --no-audit --no-fund && npm run build
     staticPublishPath: ./dist
     envVars:
-      - key: NODE_VERSION
-        value: 20.11.0
-      - key: NODE_OPTIONS
-        value: --max-old-space-size=2048
       - key: NODE_ENV
         value: production
       - key: VITE_SUPABASE_URL
