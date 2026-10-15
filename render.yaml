@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: kmca-admin
+    runtime: static
+    buildCommand: npm install --prefer-offline --no-audit --no-fund && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=2048
+      - key: NODE_ENV
+        value: production
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_VAPID_PUBLIC_KEY
+        sync: false
+      - key: VITE_CLOUDINARY_CLOUD
+        sync: false
+      - key: VITE_CLOUDINARY_PRESET
+        sync: false
+      - key: VITE_CLOUDINARY_FOLDER
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /icons/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+      - path: /manifest.json
+        name: Cache-Control
+        value: no-cache
