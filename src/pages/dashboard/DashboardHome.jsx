@@ -49,63 +49,6 @@ function Monitor({ title, icon, used, limit, format, color }) {
   );
 }
 
-function CloudinaryMonitors({ view, cloud }) {
-  const acc1 = cloud?.accounts?.find((a) => a.name === 'picha_audio');
-  const acc2 = cloud?.accounts?.find((a) => a.name === 'video');
-
-  // Chagua data kulingana na view
-  let data;
-  let title;
-  let color;
-
-  if (view === 'picha' && acc1 && !acc1.error) {
-    data = acc1;
-    title = '🖼️ Picha + Audio';
-    color = '#60a5fa';
-  } else if (view === 'video' && acc2 && !acc2.error) {
-    data = acc2;
-    title = '🎬 Video';
-    color = '#f59e0b';
-  } else {
-    // Zote — jumla
-    const s1 = acc1?.storage?.used || 0;
-    const s2 = acc2?.storage?.used || 0;
-    const b1 = acc1?.bandwidth?.used || 0;
-    const b2 = acc2?.bandwidth?.used || 0;
-    const t1 = acc1?.transformations?.used || 0;
-    const t2 = acc2?.transformations?.used || 0;
-    const c1 = acc1?.credits?.used || 0;
-    const c2 = acc2?.credits?.used || 0;
-
-    data = {
-      storage: { used: s1 + s2, limit: 25 * 1024 * 1024 * 1024 },
-      bandwidth: { used: b1 + b2, limit: 25 * 1024 * 1024 * 1024 },
-      transformations: { used: t1 + t2, limit: 25000 },
-      credits: { used: c1 + c2, limit: 25 },
-    };
-    title = '📦 Zote (Picha/Audio + Video)';
-    color = '#9333ea';
-  }
-
-  return (
-    <div className="section">
-      <div className="section-title" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        ☁️ Cloudinary Storage
-        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 400 }}>
-          ({title})
-        </span>
-      </div>
-
-      <div className="monitors-grid">
-        <Monitor title="Storage" icon="💾" used={data.storage.used} limit={data.storage.limit} color={color} />
-        <Monitor title="Bandwidth" icon="📡" used={data.bandwidth.used} limit={data.bandwidth.limit} color={color} />
-        <Monitor title="Transformations" icon="🔄" used={data.transformations.used} limit={data.transformations.limit} format={(n) => String(n)} color={color} />
-        <Monitor title="Credits" icon="💳" used={data.credits.used} limit={data.credits.limit} format={(n) => Number(n).toFixed(2)} color={color} />
-      </div>
-    </div>
-  );
-}
-
 export default function DashboardHome() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ visits: 0, pwa: 0, posts: 0, online: 0 });
@@ -152,7 +95,6 @@ export default function DashboardHome() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Cycle: zote → picha → video → zote
   function cycleView() {
     setView((v) => (v === 'zote' ? 'picha' : v === 'picha' ? 'video' : 'zote'));
   }
@@ -161,6 +103,29 @@ export default function DashboardHome() {
     view === 'zote' ? '📦 Zote' :
     view === 'picha' ? '🖼️ Picha/Audio' :
     '🎬 Video';
+
+  const acc1 = cloud?.accounts?.find((a) => a.name === 'picha_audio');
+  const acc2 = cloud?.accounts?.find((a) => a.name === 'video');
+
+  // Jumla ya account 2, limit × 2
+  const total = {
+    storage: {
+      used: (acc1?.storage?.used || 0) + (acc2?.storage?.used || 0),
+      limit: 50 * 1024 * 1024 * 1024, // 50 GB
+    },
+    bandwidth: {
+      used: (acc1?.bandwidth?.used || 0) + (acc2?.bandwidth?.used || 0),
+      limit: 50 * 1024 * 1024 * 1024, // 50 GB
+    },
+    transformations: {
+      used: (acc1?.transformations?.used || 0) + (acc2?.transformations?.used || 0),
+      limit: 50000, // 25,000 × 2
+    },
+    credits: {
+      used: (acc1?.credits?.used || 0) + (acc2?.credits?.used || 0),
+      limit: 50, // 25 × 2
+    },
+  };
 
   return (
     <div className="dashboard">
@@ -242,7 +207,7 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Cloudinary — pamoja na button */}
+      {/* Cloudinary — na button */}
       <div className="section">
         <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <span>☁️ Cloudinary Storage</span>
@@ -256,7 +221,6 @@ export default function DashboardHome() {
               borderRadius: '999px',
               fontSize: '0.8rem',
               cursor: 'pointer',
-              transition: '0.2s',
               fontWeight: 600,
             }}
           >
@@ -267,54 +231,35 @@ export default function DashboardHome() {
         {cloud?.ok ? (
           <>
             {view === 'zote' && (
-              <>
-                {/* Jumla */}
-                {(() => {
-                  const acc1 = cloud.accounts.find((a) => a.name === 'picha_audio');
-                  const acc2 = cloud.accounts.find((a) => a.name === 'video');
-                  const total = {
-                    storage: { used: (acc1?.storage?.used || 0) + (acc2?.storage?.used || 0), limit: 25 * 1024 * 1024 * 1024 },
-                    bandwidth: { used: (acc1?.bandwidth?.used || 0) + (acc2?.bandwidth?.used || 0), limit: 25 * 1024 * 1024 * 1024 },
-                    transformations: { used: (acc1?.transformations?.used || 0) + (acc2?.transformations?.used || 0), limit: 25000 },
-                    credits: { used: (acc1?.credits?.used || 0) + (acc2?.credits?.used || 0), limit: 25 },
-                  };
-                  return (
-                    <div className="monitors-grid">
-                      <Monitor title="Storage" icon="💾" used={total.storage.used} limit={total.storage.limit} color="#9333ea" />
-                      <Monitor title="Bandwidth" icon="📡" used={total.bandwidth.used} limit={total.bandwidth.limit} color="#9333ea" />
-                      <Monitor title="Transformations" icon="🔄" used={total.transformations.used} limit={total.transformations.limit} format={(n) => String(n)} color="#9333ea" />
-                      <Monitor title="Credits" icon="💳" used={total.credits.used} limit={total.credits.limit} format={(n) => Number(n).toFixed(2)} color="#9333ea" />
-                    </div>
-                  );
-                })()}
-              </>
+              <div className="monitors-grid">
+                <Monitor title="Storage" icon="💾" used={total.storage.used} limit={total.storage.limit} color="#9333ea" />
+                <Monitor title="Bandwidth" icon="📡" used={total.bandwidth.used} limit={total.bandwidth.limit} color="#9333ea" />
+                <Monitor title="Transformations" icon="🔄" used={total.transformations.used} limit={total.transformations.limit} format={(n) => String(n)} color="#9333ea" />
+                <Monitor title="Credits" icon="💳" used={total.credits.used} limit={total.credits.limit} format={(n) => Number(n).toFixed(2)} color="#9333ea" />
+              </div>
             )}
 
-            {view === 'picha' && (() => {
-              const acc = cloud.accounts.find((a) => a.name === 'picha_audio');
-              if (!acc || acc.error) return <p style={{ color: 'var(--color-text-muted)' }}>Kosa</p>;
-              return (
-                <div className="monitors-grid">
-                  <Monitor title="Storage" icon="💾" used={acc.storage.used} limit={acc.storage.limit} color="#60a5fa" />
-                  <Monitor title="Bandwidth" icon="📡" used={acc.bandwidth.used} limit={acc.bandwidth.limit} color="#60a5fa" />
-                  <Monitor title="Transformations" icon="🔄" used={acc.transformations.used} limit={acc.transformations.limit} format={(n) => String(n)} color="#60a5fa" />
-                  <Monitor title="Credits" icon="💳" used={acc.credits.used} limit={acc.credits.limit} format={(n) => Number(n).toFixed(2)} color="#60a5fa" />
-                </div>
-              );
-            })()}
+            {view === 'picha' && acc1 && !acc1.error && (
+              <div className="monitors-grid">
+                <Monitor title="Storage" icon="💾" used={acc1.storage.used} limit={acc1.storage.limit} color="#60a5fa" />
+                <Monitor title="Bandwidth" icon="📡" used={acc1.bandwidth.used} limit={acc1.bandwidth.limit} color="#60a5fa" />
+                <Monitor title="Transformations" icon="🔄" used={acc1.transformations.used} limit={acc1.transformations.limit} format={(n) => String(n)} color="#60a5fa" />
+                <Monitor title="Credits" icon="💳" used={acc1.credits.used} limit={acc1.credits.limit} format={(n) => Number(n).toFixed(2)} color="#60a5fa" />
+              </div>
+            )}
 
-            {view === 'video' && (() => {
-              const acc = cloud.accounts.find((a) => a.name === 'video');
-              if (!acc || acc.error) return <p style={{ color: 'var(--color-text-muted)' }}>Kosa</p>;
-              return (
-                <div className="monitors-grid">
-                  <Monitor title="Storage" icon="💾" used={acc.storage.used} limit={acc.storage.limit} color="#f59e0b" />
-                  <Monitor title="Bandwidth" icon="📡" used={acc.bandwidth.used} limit={acc.bandwidth.limit} color="#f59e0b" />
-                  <Monitor title="Transformations" icon="🔄" used={acc.transformations.used} limit={acc.transformations.limit} format={(n) => String(n)} color="#f59e0b" />
-                  <Monitor title="Credits" icon="💳" used={acc.credits.used} limit={acc.credits.limit} format={(n) => Number(n).toFixed(2)} color="#f59e0b" />
-                </div>
-              );
-            })()}
+            {view === 'video' && acc2 && !acc2.error && (
+              <div className="monitors-grid">
+                <Monitor title="Storage" icon="💾" used={acc2.storage.used} limit={acc2.storage.limit} color="#f59e0b" />
+                <Monitor title="Bandwidth" icon="📡" used={acc2.bandwidth.used} limit={acc2.bandwidth.limit} color="#f59e0b" />
+                <Monitor title="Transformations" icon="🔄" used={acc2.transformations.used} limit={acc2.transformations.limit} format={(n) => String(n)} color="#f59e0b" />
+                <Monitor title="Credits" icon="💳" used={acc2.credits.used} limit={acc2.credits.limit} format={(n) => Number(n).toFixed(2)} color="#f59e0b" />
+              </div>
+            )}
+
+            {((view === 'picha' && (!acc1 || acc1.error)) || (view === 'video' && (!acc2 || acc2.error))) && (
+              <p style={{ color: 'var(--color-text-muted)' }}>Kosa la kupata data</p>
+            )}
           </>
         ) : (
           <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>
