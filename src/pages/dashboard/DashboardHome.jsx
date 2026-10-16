@@ -89,7 +89,15 @@ export default function DashboardHome() {
     const timer = setTimeout(() => {
       const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
       const pwaInstalled = window.matchMedia('(display-mode: standalone)').matches;
-      if (!notifGranted || !pwaInstalled) setShowPermission(true);
+      const notifDone = localStorage.getItem('perm_notif_done') === '1';
+      const pwaDone = localStorage.getItem('perm_pwa_done') === '1';
+
+      const needPWA = !pwaInstalled && !pwaDone;
+      const needNotif = !notifGranted && !notifDone;
+
+      if (needPWA || needNotif) {
+        setShowPermission(true);
+      }
     }, 2000);
 
     return () => clearTimeout(timer);

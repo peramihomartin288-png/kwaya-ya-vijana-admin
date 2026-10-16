@@ -11,7 +11,10 @@ function urlBase64ToUint8Array(base64String) {
 
 async function getVisitorId() {
   let id = localStorage.getItem('visitor_id');
-  if (!id) { id = crypto.randomUUID(); localStorage.setItem('visitor_id', id); }
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('visitor_id', id);
+  }
   return id;
 }
 
@@ -29,19 +32,29 @@ async function track(event, value) {
 
 export default function PermissionSlide({ onDone }) {
   const pwaInstalled = window.matchMedia('(display-mode: standalone)').matches;
+  const pwaDone = localStorage.getItem('perm_pwa_done') === '1';
   const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
+  const notifDone = localStorage.getItem('perm_notif_done') === '1';
+
+  // Kama zote zimekamilika, funga moja kwa moja
+  if ((pwaInstalled || pwaDone) && (notifGranted || notifDone)) {
+    setTimeout(() => onDone?.(), 0);
+    return null;
+  }
 
   // Hatua 1 = Install, Hatua 2 = Notifications
-  const [step, setStep] = useState(pwaInstalled ? 2 : 1);
+  const [step, setStep] = useState(pwaInstalled || pwaDone ? 2 : 1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function installPWA() {
     window.dispatchEvent(new Event('trigger-install'));
-    await track('pwa');
+    try {
+      await track('pwa');
+    } catch {}
     localStorage.setItem('perm_pwa_done', '1');
 
-    // Subiri kidogo, kisha nenda step 2
+    // Nenda hatua 2 baada ya muda mfupi
     setTimeout(() => setStep(2), 800);
   }
 
@@ -59,29 +72,40 @@ export default function PermissionSlide({ onDone }) {
       const perm = await Notification.requestPermission();
 
       if (perm === 'granted') {
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY),
-        });
-        const json = sub.toJSON();
-        const visitor_id = await getVisitorId();
+        // Weka flag mara moja
+        localStorage.setItem('perm_notif_done', '1');
 
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/subscribe-push`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            endpoint: json.endpoint,
-            p256dh: json.keys.p256dh,
-            auth: json.keys.auth,
-            visitor_id,
-          }),
-        });
-        await track('notifications', true);
+        // Fanya subscription kwa background (usisubiri)
+        setTimeout(async () => {
+          try {
+            const reg = await navigator.serviceWorker.ready;
+            const sub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY),
+            });
+            const json = sub.toJSON();
+            const visitor_id = await getVisitorId();
 
+            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/subscribe-push`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                endpoint: json.endpoint,
+                p256dh: json.keys.p256dh,
+                auth: json.keys.auth,
+                visitor_id,
+              }),
+            });
+            await track('notifications', true);
+          } catch (e) {
+            console.error('Push subscription error:', e);
+          }
+        }, 100);
+
+        // Funga slide mara moja
         setLoading(false);
         onDone?.();
         return;
@@ -102,6 +126,7 @@ export default function PermissionSlide({ onDone }) {
       localStorage.setItem('perm_pwa_done', '1');
       setStep(2);
     } else {
+      localStorage.setItem('perm_notif_done', '1');
       onDone?.();
     }
   }
@@ -116,11 +141,11 @@ export default function PermissionSlide({ onDone }) {
             <h2>Sakinisha App</h2>
             <p>Itumike kama app ya kawaida kwenye simu yako — bila browser.</p>
 
-            {pwaInstalled ? (
+            {pwaInstalled && (
               <div style={{ color: '#4ade80', fontSize: '0.85rem', marginBottom: 12 }}>
                 ✅ Imeshasakinishwa
               </div>
-            ) : null}
+            )}
 
             <Button onClick={installPWA} fullWidth>Sakinisha</Button>
             <button className="permission-skip" onClick={skip}>Baadaye</button>
@@ -136,11 +161,11 @@ export default function PermissionSlide({ onDone }) {
 
             {error && <div className="login-error" style={{ fontSize: '0.75rem' }}>{error}</div>}
 
-            {notifGranted ? (
+            {notifGranted && (
               <div style={{ color: '#4ade80', fontSize: '0.85rem', marginBottom: 12 }}>
                 ✅ Imesharuhusiwa
               </div>
-            ) : null}
+            )}
 
             <Button onClick={allowNotifications} fullWidth loading={loading}>
               Ruhusu Notifications
