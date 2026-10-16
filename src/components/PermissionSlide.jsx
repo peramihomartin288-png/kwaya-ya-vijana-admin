@@ -28,12 +28,22 @@ async function track(event, value) {
 }
 
 export default function PermissionSlide({ onDone }) {
-  const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
   const pwaInstalled = window.matchMedia('(display-mode: standalone)').matches;
+  const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
 
-  const [step, setStep] = useState(notifGranted ? 2 : 1);
+  // Hatua 1 = Install, Hatua 2 = Notifications
+  const [step, setStep] = useState(pwaInstalled ? 2 : 1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  async function installPWA() {
+    window.dispatchEvent(new Event('trigger-install'));
+    await track('pwa');
+    localStorage.setItem('perm_pwa_done', '1');
+
+    // Subiri kidogo, kisha nenda step 2
+    setTimeout(() => setStep(2), 800);
+  }
 
   async function allowNotifications() {
     setError('');
@@ -73,7 +83,7 @@ export default function PermissionSlide({ onDone }) {
         await track('notifications', true);
 
         setLoading(false);
-        setStep(2);
+        onDone?.();
         return;
       }
 
@@ -87,42 +97,24 @@ export default function PermissionSlide({ onDone }) {
     setLoading(false);
   }
 
-  async function installPWA() {
-    window.dispatchEvent(new Event('trigger-install'));
-    await track('pwa');
-    localStorage.setItem('perm_pwa_done', '1');
-    onDone?.();
-  }
-
   function skip() {
-    if (step === 1) setStep(2);
-    else onDone?.();
+    if (step === 1) {
+      localStorage.setItem('perm_pwa_done', '1');
+      setStep(2);
+    } else {
+      onDone?.();
+    }
   }
 
   return (
     <div className="permission-slide-overlay">
       <div className="permission-slide">
+        {/* Step 1 — Install PWA */}
         {step === 1 && (
-          <div className="permission-slide-content">
-            <div className="permission-slide-icon">🔔</div>
-            <h2>Ruhusu Notifications</h2>
-            <p>Pata taarifa za haraka kuhusu daily cards, sala maalumu, na matukio mapya.</p>
-
-            {error && <div className="login-error" style={{ fontSize: '0.75rem' }}>{error}</div>}
-
-            <Button onClick={allowNotifications} fullWidth loading={loading}>
-              Ruhusu Notifications
-            </Button>
-
-            <button className="permission-skip" onClick={skip}>Baadaye</button>
-          </div>
-        )}
-
-        {step === 2 && (
           <div className="permission-slide-content">
             <div className="permission-slide-icon">📱</div>
             <h2>Sakinisha App</h2>
-            <p>Itumike kama app ya kawaida kwenye simu yako.</p>
+            <p>Itumike kama app ya kawaida kwenye simu yako — bila browser.</p>
 
             {pwaInstalled ? (
               <div style={{ color: '#4ade80', fontSize: '0.85rem', marginBottom: 12 }}>
@@ -131,6 +123,29 @@ export default function PermissionSlide({ onDone }) {
             ) : null}
 
             <Button onClick={installPWA} fullWidth>Sakinisha</Button>
+            <button className="permission-skip" onClick={skip}>Baadaye</button>
+          </div>
+        )}
+
+        {/* Step 2 — Notifications */}
+        {step === 2 && (
+          <div className="permission-slide-content">
+            <div className="permission-slide-icon">🔔</div>
+            <h2>Ruhusu Notifications</h2>
+            <p>Pata taarifa za haraka kuhusu daily cards, sala maalumu, na matukio mapya.</p>
+
+            {error && <div className="login-error" style={{ fontSize: '0.75rem' }}>{error}</div>}
+
+            {notifGranted ? (
+              <div style={{ color: '#4ade80', fontSize: '0.85rem', marginBottom: 12 }}>
+                ✅ Imesharuhusiwa
+              </div>
+            ) : null}
+
+            <Button onClick={allowNotifications} fullWidth loading={loading}>
+              Ruhusu Notifications
+            </Button>
+
             <button className="permission-skip" onClick={skip}>Baadaye</button>
           </div>
         )}
