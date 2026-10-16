@@ -8,6 +8,7 @@ import DashboardHome from './pages/dashboard/DashboardHome';
 import Analytics from './pages/dashboard/Analytics';
 
 import Users from './pages/Users';
+import LiturgicalColors from './pages/LiturgicalColors';
 
 import Watakatifu from './pages/daily-cards/Watakatifu';
 import MasomoDominika from './pages/daily-cards/MasomoDominika';
@@ -36,18 +37,15 @@ import Notifications from './pages/Notifications';
 export default function Router() {
   return (
     <Routes>
-      {/* Intro */}
       <Route path="/intro" element={<Intro />} />
-
-      {/* Login */}
       <Route path="/login" element={<Login />} />
 
-      {/* Protected */}
       <Route element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route path="/" element={<DashboardHome />} />
         <Route path="/analytics" element={<Analytics />} />
 
         <Route path="/users" element={<Users />} />
+        <Route path="/liturgical-colors" element={<LiturgicalColors />} />
 
         <Route path="/daily-cards/watakatifu" element={<Watakatifu />} />
         <Route path="/daily-cards/masomo" element={<MasomoDominika />} />
@@ -74,7 +72,6 @@ export default function Router() {
         <Route path="/notifications" element={<Notifications />} />
       </Route>
 
-      {/* Default → Intro */}
       <Route path="*" element={<Navigate to="/intro" replace />} />
     </Routes>
   );

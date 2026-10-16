@@ -4,17 +4,20 @@ import { useAuth } from '../context/AuthContext';
 
 const menu = [
   {
-    title: 'Main', icon: '🏠',
+    title: 'Main',
+    icon: '🏠',
     items: [
       { to: '/', label: 'Dashboard', icon: '📊', end: true },
       { to: '/analytics', label: 'Analytics', icon: '📈' },
       { to: '/users', label: 'Watumiaji', icon: '👥' },
       { to: '/live', label: 'Live', icon: '🔴' },
       { to: '/fake-live', label: 'Fake Live', icon: '📺' },
+      { to: '/liturgical-colors', label: 'Rangi za Misa', icon: '🎨' },
     ],
   },
   {
-    title: 'Daily Cards', icon: '📅',
+    title: 'Daily Cards',
+    icon: '📅',
     items: [
       { to: '/daily-cards/watakatifu', label: 'Watakatifu', icon: '✝️' },
       { to: '/daily-cards/masomo', label: 'Masomo ya Dominika', icon: '📖' },
@@ -23,7 +26,8 @@ const menu = [
     ],
   },
   {
-    title: 'Content', icon: '🖼️',
+    title: 'Content',
+    icon: '🖼️',
     items: [
       { to: '/content/single-image', label: 'Picha Moja', icon: '🖼️' },
       { to: '/content/multi-image', label: 'Picha Nyingi', icon: '🖼️🖼️' },
@@ -33,7 +37,8 @@ const menu = [
     ],
   },
   {
-    title: 'Other Content', icon: '📁',
+    title: 'Other Content',
+    icon: '📁',
     items: [
       { to: '/other-content/sala', label: 'Sala', icon: '🙏' },
       { to: '/other-content/matukio', label: 'Matukio', icon: '📅' },
@@ -41,7 +46,8 @@ const menu = [
     ],
   },
   {
-    title: 'Settings', icon: '⚙️',
+    title: 'Settings',
+    icon: '⚙️',
     items: [
       { to: '/settings/about', label: 'About', icon: 'ℹ️' },
       { to: '/settings/footer', label: 'Footer', icon: '🔗' },
@@ -57,8 +63,14 @@ export default function Sidebar({ open, onClose }) {
   const navigate = useNavigate();
   const [openSection, setOpenSection] = useState(null);
 
-  function handleLogout() { logout(); navigate('/login'); }
-  function toggleSection(title) { setOpenSection(openSection === title ? null : title); }
+  function handleLogout() {
+    logout();
+    navigate('/login');
+  }
+
+  function toggleSection(title) {
+    setOpenSection(openSection === title ? null : title);
+  }
 
   return (
     <>
@@ -81,7 +93,9 @@ export default function Sidebar({ open, onClose }) {
               >
                 <span className="icon">{section.icon}</span>
                 <span className="label">{section.title}</span>
-                <span className="chevron">{openSection === section.title ? '▾' : '▸'}</span>
+                <span className="chevron">
+                  {openSection === section.title ? '▾' : '▸'}
+                </span>
               </button>
 
               {openSection === section.title && (
@@ -91,7 +105,9 @@ export default function Sidebar({ open, onClose }) {
                       key={item.to}
                       to={item.to}
                       end={item.end}
-                      className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                      className={({ isActive }) =>
+                        `nav-item ${isActive ? 'active' : ''}`
+                      }
                       onClick={onClose}
                     >
                       <span className="icon">{item.icon}</span>
@@ -105,7 +121,9 @@ export default function Sidebar({ open, onClose }) {
         </nav>
 
         <div className="sidebar-footer">
-          <button className="logout-btn" onClick={handleLogout}>🚪 Toka</button>
+          <button className="logout-btn" onClick={handleLogout}>
+            🚪 Toka
+          </button>
         </div>
       </aside>
     </>

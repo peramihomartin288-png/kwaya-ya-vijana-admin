@@ -8,6 +8,7 @@ const titles = {
   '/': 'Dashboard',
   '/analytics': 'Analytics',
   '/users': 'Watumiaji',
+  '/liturgical-colors': 'Rangi za Misa',
   '/live': 'Live',
   '/fake-live': 'Fake Live',
   '/daily-cards/watakatifu': 'Watakatifu',
