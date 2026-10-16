@@ -56,7 +56,7 @@ export default function DashboardHome() {
   const [supa, setSupa] = useState(null);
   const [cloud, setCloud] = useState(null);
   const [showPermission, setShowPermission] = useState(false);
-  const [view, setView] = useState('zote'); // 'zote' | 'picha' | 'video'
+  const [view, setView] = useState('zote');
 
   useEffect(() => {
     async function load() {
@@ -95,15 +95,6 @@ export default function DashboardHome() {
     return () => clearTimeout(timer);
   }, []);
 
-  function cycleView() {
-    setView((v) => (v === 'zote' ? 'picha' : v === 'picha' ? 'video' : 'zote'));
-  }
-
-  const viewLabel =
-    view === 'zote' ? '📦 Zote' :
-    view === 'picha' ? '🖼️ Picha/Audio' :
-    '🎬 Video';
-
   const acc1 = cloud?.accounts?.find((a) => a.name === 'picha_audio');
   const acc2 = cloud?.accounts?.find((a) => a.name === 'video');
 
@@ -111,19 +102,19 @@ export default function DashboardHome() {
   const total = {
     storage: {
       used: (acc1?.storage?.used || 0) + (acc2?.storage?.used || 0),
-      limit: 50 * 1024 * 1024 * 1024, // 50 GB
+      limit: 50 * 1024 * 1024 * 1024,
     },
     bandwidth: {
       used: (acc1?.bandwidth?.used || 0) + (acc2?.bandwidth?.used || 0),
-      limit: 50 * 1024 * 1024 * 1024, // 50 GB
+      limit: 50 * 1024 * 1024 * 1024,
     },
     transformations: {
       used: (acc1?.transformations?.used || 0) + (acc2?.transformations?.used || 0),
-      limit: 50000, // 25,000 × 2
+      limit: 50000,
     },
     credits: {
       used: (acc1?.credits?.used || 0) + (acc2?.credits?.used || 0),
-      limit: 50, // 25 × 2
+      limit: 50,
     },
   };
 
@@ -207,25 +198,34 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Cloudinary — na button */}
+      {/* Cloudinary — dropdown */}
       <div className="section">
         <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <span>☁️ Cloudinary Storage</span>
-          <button
-            onClick={cycleView}
+          <select
+            value={view}
+            onChange={(e) => setView(e.target.value)}
             style={{
               background: 'rgba(147, 51, 234, 0.15)',
               border: '1px solid var(--color-border)',
               color: 'var(--color-text)',
-              padding: '6px 14px',
+              padding: '6px 32px 6px 14px',
               borderRadius: '999px',
               fontSize: '0.8rem',
               cursor: 'pointer',
               fontWeight: 600,
+              appearance: 'none',
+              backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23a0a0b0\' stroke-width=\'2\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'right 10px center',
+              backgroundSize: '14px',
+              outline: 'none',
             }}
           >
-            {viewLabel} ▾
-          </button>
+            <option value="zote">📦 Zote</option>
+            <option value="picha">🖼️ Picha/Audio</option>
+            <option value="video">🎬 Video</option>
+          </select>
         </div>
 
         {cloud?.ok ? (
@@ -255,10 +255,6 @@ export default function DashboardHome() {
                 <Monitor title="Transformations" icon="🔄" used={acc2.transformations.used} limit={acc2.transformations.limit} format={(n) => String(n)} color="#f59e0b" />
                 <Monitor title="Credits" icon="💳" used={acc2.credits.used} limit={acc2.credits.limit} format={(n) => Number(n).toFixed(2)} color="#f59e0b" />
               </div>
-            )}
-
-            {((view === 'picha' && (!acc1 || acc1.error)) || (view === 'video' && (!acc2 || acc2.error))) && (
-              <p style={{ color: 'var(--color-text-muted)' }}>Kosa la kupata data</p>
             )}
           </>
         ) : (
