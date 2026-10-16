@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from './Button';
 import '../styles/pwa/permission-slide.css';
 
@@ -32,30 +32,28 @@ async function track(event, value) {
 
 export default function PermissionSlide({ onDone }) {
   const pwaInstalled = window.matchMedia('(display-mode: standalone)').matches;
-  const pwaDone = localStorage.getItem('perm_pwa_done') === '1';
   const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
-  const notifDone = localStorage.getItem('perm_notif_done') === '1';
-
-  // Kama zote zimekamilika, funga moja kwa moja
-  if ((pwaInstalled || pwaDone) && (notifGranted || notifDone)) {
-    setTimeout(() => onDone?.(), 0);
-    return null;
-  }
 
   // Hatua 1 = Install, Hatua 2 = Notifications
-  const [step, setStep] = useState(pwaInstalled || pwaDone ? 2 : 1);
+  const [step, setStep] = useState(pwaInstalled ? 2 : 1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Kama zote zimekamilika, funga
+  useEffect(() => {
+    if (pwaInstalled && notifGranted) {
+      onDone?.();
+    }
+  }, [pwaInstalled, notifGranted, onDone]);
 
   async function installPWA() {
     window.dispatchEvent(new Event('trigger-install'));
     try {
       await track('pwa');
     } catch {}
-    localStorage.setItem('perm_pwa_done', '1');
 
-    // Nenda hatua 2 baada ya muda mfupi
-    setTimeout(() => setStep(2), 800);
+    // Subiri kidogo kwa install dialog, kisha nenda step 2
+    setTimeout(() => setStep(2), 2000);
   }
 
   async function allowNotifications() {
@@ -72,10 +70,7 @@ export default function PermissionSlide({ onDone }) {
       const perm = await Notification.requestPermission();
 
       if (perm === 'granted') {
-        // Weka flag mara moja
-        localStorage.setItem('perm_notif_done', '1');
-
-        // Fanya subscription kwa background (usisubiri)
+        // Fanya subscription (background)
         setTimeout(async () => {
           try {
             const reg = await navigator.serviceWorker.ready;
@@ -105,7 +100,6 @@ export default function PermissionSlide({ onDone }) {
           }
         }, 100);
 
-        // Funga slide mara moja
         setLoading(false);
         onDone?.();
         return;
@@ -121,14 +115,13 @@ export default function PermissionSlide({ onDone }) {
     setLoading(false);
   }
 
-  function skip() {
-    if (step === 1) {
-      localStorage.setItem('perm_pwa_done', '1');
-      setStep(2);
-    } else {
-      localStorage.setItem('perm_notif_done', '1');
-      onDone?.();
-    }
+  // "Baadaye" — HAINA kuweka flag (inarudi tena)
+  function skipPWA() {
+    setStep(2);
+  }
+
+  function skipNotif() {
+    onDone?.();
   }
 
   return (
@@ -148,7 +141,7 @@ export default function PermissionSlide({ onDone }) {
             )}
 
             <Button onClick={installPWA} fullWidth>Sakinisha</Button>
-            <button className="permission-skip" onClick={skip}>Baadaye</button>
+            <button className="permission-skip" onClick={skipPWA}>Baadaye</button>
           </div>
         )}
 
@@ -171,7 +164,7 @@ export default function PermissionSlide({ onDone }) {
               Ruhusu Notifications
             </Button>
 
-            <button className="permission-skip" onClick={skip}>Baadaye</button>
+            <button className="permission-skip" onClick={skipNotif}>Baadaye</button>
           </div>
         )}
       </div>

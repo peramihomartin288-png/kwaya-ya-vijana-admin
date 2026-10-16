@@ -89,13 +89,8 @@ export default function DashboardHome() {
     const timer = setTimeout(() => {
       const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
       const pwaInstalled = window.matchMedia('(display-mode: standalone)').matches;
-      const notifDone = localStorage.getItem('perm_notif_done') === '1';
-      const pwaDone = localStorage.getItem('perm_pwa_done') === '1';
 
-      const needPWA = !pwaInstalled && !pwaDone;
-      const needNotif = !notifGranted && !notifDone;
-
-      if (needPWA || needNotif) {
+      if (!notifGranted || !pwaInstalled) {
         setShowPermission(true);
       }
     }, 2000);
@@ -106,7 +101,6 @@ export default function DashboardHome() {
   const acc1 = cloud?.accounts?.find((a) => a.name === 'picha_audio');
   const acc2 = cloud?.accounts?.find((a) => a.name === 'video');
 
-  // Jumla ya account 2, limit × 2
   const total = {
     storage: {
       used: (acc1?.storage?.used || 0) + (acc2?.storage?.used || 0),
@@ -130,7 +124,6 @@ export default function DashboardHome() {
     <div className="dashboard">
       {showPermission && <PermissionSlide onDone={() => setShowPermission(false)} />}
 
-      {/* Stats */}
       <div className="stats-grid">
         {loading ? (
           <><SkeletonStat /><SkeletonStat /><SkeletonStat /><SkeletonStat /></>
@@ -156,7 +149,6 @@ export default function DashboardHome() {
         )}
       </div>
 
-      {/* Quick Actions */}
       <div className="section">
         <div className="section-title">⚡ Vitendo vya Haraka</div>
         <div className="quick-actions">
@@ -169,7 +161,6 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Recent Posts */}
       <div className="section">
         <div className="section-title">🆕 Posts za Hivi Karibuni</div>
         {loading ? (
@@ -189,7 +180,6 @@ export default function DashboardHome() {
         )}
       </div>
 
-      {/* Backend */}
       <div className="section">
         <div className="monitor-group">
           <div className="monitor-group-title backend">🟢 Backend (Supabase)</div>
@@ -206,7 +196,6 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Cloudinary — dropdown */}
       <div className="section">
         <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <span>☁️ Cloudinary Storage</span>
