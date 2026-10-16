@@ -1,0 +1,15 @@
+name: Keep Render Alive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render
+        run: |
+          echo "Pinging Render at $(date)"
+          curl -s -o /dev/null -w "Status: %{http_code}\n" https://kmca-admin-vbcw.onrender.com/
