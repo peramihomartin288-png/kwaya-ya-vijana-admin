@@ -28,6 +28,7 @@ const titles = {
   '/settings/intro': 'Intro Page',
   '/media': 'Media Library',
   '/notifications': 'Notifications',
+  '/admin-management': 'Msimamizi',
 };
 
 export default function AdminLayout() {

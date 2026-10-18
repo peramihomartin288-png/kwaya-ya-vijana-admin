@@ -54,6 +54,7 @@ const menu = [
       { to: '/settings/intro', label: 'Intro Page', icon: '🎨' },
       { to: '/media', label: 'Media Library', icon: '📁' },
       { to: '/notifications', label: 'Notifications', icon: '🔔' },
+      { to: '/admin-management', label: 'Msimamizi', icon: '🛠️' },
     ],
   },
 ];

@@ -5,6 +5,18 @@ import Button from './Button';
 import AudioTrimmer from './AudioTrimmer';
 import '../styles/components/media-picker.css';
 
+// Tambua kama ni YouTube
+function isYouTube(url) {
+  return url?.includes('youtube.com') || url?.includes('youtu.be');
+}
+
+// Pata YouTube ID
+function getYouTubeId(url) {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  return match ? match[1] : null;
+}
+
 export default function MediaPicker({
   label, value, onChange, type = 'image', accept, trim,
 }) {
@@ -25,7 +37,6 @@ export default function MediaPicker({
     let file = e.target.files?.[0];
     if (!file) return;
 
-    // Limit
     const limit =
       type === 'image' ? 5 * 1024 * 1024 :
       type === 'video' ? 50 * 1024 * 1024 :
@@ -40,7 +51,6 @@ export default function MediaPicker({
     setError('');
 
     try {
-      // Compress picha kama ni kubwa
       if (type === 'image' && file.size > 500 * 1024) {
         file = await imageCompression(file, {
           maxSizeMB: 0.5,
@@ -71,6 +81,45 @@ export default function MediaPicker({
   function handleTrim(data) {
     setTrimData(data);
     onChange?.(value, data);
+  }
+
+  function renderPreview() {
+    if (!value) return null;
+
+    // Kama ni YouTube
+    if (isYouTube(value)) {
+      const id = getYouTubeId(value);
+      if (id) {
+        return (
+          <div style={{ position: 'relative', width: '100%', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: 'var(--radius-md)' }}>
+            <iframe
+              src={`https://www.youtube.com/embed/${id}`}
+              title="YouTube Preview"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+            />
+          </div>
+        );
+      }
+    }
+
+    // Kama ni Image
+    if (type === 'image') {
+      return <img src={thumbUrl(value, 400)} alt="Preview" />;
+    }
+
+    // Kama ni Video (Cloudinary au nyingine)
+    if (type === 'video') {
+      return <video src={videoUrl(value)} controls />;
+    }
+
+    // Kama ni Audio
+    if (type === 'audio') {
+      return <audio src={audioUrl(value)} controls />;
+    }
+
+    return null;
   }
 
   return (
@@ -131,9 +180,7 @@ export default function MediaPicker({
 
       {value && (
         <div className="media-preview">
-          {type === 'image' && <img src={thumbUrl(value, 400)} alt="Preview" />}
-          {type === 'video' && <video src={videoUrl(value)} controls />}
-          {type === 'audio' && <audio src={audioUrl(value)} controls />}
+          {renderPreview()}
 
           <div className="media-preview-actions">
             {type === 'audio' && (

@@ -33,6 +33,7 @@ import Live from './pages/Live';
 import FakeLive from './pages/FakeLive';
 import MediaLibrary from './pages/MediaLibrary';
 import Notifications from './pages/Notifications';
+import AdminManagement from './pages/AdminManagement';
 
 export default function Router() {
   return (
@@ -70,6 +71,8 @@ export default function Router() {
         <Route path="/fake-live" element={<FakeLive />} />
         <Route path="/media" element={<MediaLibrary />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/admin-management" element={<AdminManagement />} />
+        <Route path="/admin-management" element={<AdminManagement />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/intro" replace />} />
