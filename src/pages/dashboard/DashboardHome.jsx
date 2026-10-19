@@ -100,7 +100,6 @@ export default function DashboardHome() {
   const acc3 = cloud?.accounts?.find((a) => a.name === 'picha_audio_dharura');
   const acc4 = cloud?.accounts?.find((a) => a.name === 'video_dharura');
 
-  // Jumla kuu (Zote)
   const total = {
     storage: { used: (acc1?.storage?.used || 0) + (acc2?.storage?.used || 0) + (acc3?.storage?.used || 0) + (acc4?.storage?.used || 0), limit: 100 * 1024 * 1024 * 1024 },
     bandwidth: { used: (acc1?.bandwidth?.used || 0) + (acc2?.bandwidth?.used || 0) + (acc3?.bandwidth?.used || 0) + (acc4?.bandwidth?.used || 0), limit: 100 * 1024 * 1024 * 1024 },
@@ -108,7 +107,6 @@ export default function DashboardHome() {
     credits: { used: (acc1?.credits?.used || 0) + (acc2?.credits?.used || 0) + (acc3?.credits?.used || 0) + (acc4?.credits?.used || 0), limit: 100 },
   };
 
-  // Dharura
   const dharura = {
     storage: { used: (acc3?.storage?.used || 0) + (acc4?.storage?.used || 0), limit: 50 * 1024 * 1024 * 1024 },
     bandwidth: { used: (acc3?.bandwidth?.used || 0) + (acc4?.bandwidth?.used || 0), limit: 50 * 1024 * 1024 * 1024 },
@@ -179,7 +177,22 @@ export default function DashboardHome() {
         )}
       </div>
 
-      {/* Cloudinary — dropdown */}
+      {/* Supabase Monitors */}
+      <div className="section">
+        <div className="section-title">🟢 Supabase (Backend)</div>
+        <div className="monitors-grid">
+          {supa?.ok ? (
+            <>
+              <Monitor title="Database" icon="💾" used={supa.database?.total || 0} limit={supa.database?.limit || 536870912} color="#4ade80" />
+              <Monitor title="Bandwidth" icon="🌐" used={supa.bandwidth?.used || 0} limit={supa.bandwidth?.limit || 5368709120} color="#4ade80" />
+            </>
+          ) : (
+            <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>
+          )}
+        </div>
+      </div>
+
+      {/* Cloudinary Monitors */}
       <div className="section">
         <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <span>☁️ Cloudinary Storage</span>
