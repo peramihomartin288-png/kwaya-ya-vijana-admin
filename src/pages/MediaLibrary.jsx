@@ -13,6 +13,29 @@ export default function MediaLibrary() {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(null);
 
+  async function handleDelete(item) {
+    if (!confirm("Futa faili hii kutoka Cloudinary? (Haitaweza kurudishwa)")) return;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-cloudinary-file`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: item.url }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert("Faili imefutwa kutoka Cloudinary! ✅");
+        await load();
+      } else {
+        alert("Kosa: " + data.error);
+      }
+    } catch (e) {
+      alert("Kosa: " + e.message);
+    }
+  }
+
   async function load() {
     setLoading(true);
     try { setData(await listMedia()); } catch (e) { console.error(e); }
@@ -36,11 +59,6 @@ export default function MediaLibrary() {
     setUploading(false);
   }
 
-  async function handleDelete(item) {
-    if (!confirm('Futa kutoka maktaba?')) return;
-    try { await deleteMedia(item.id); await load(); }
-    catch (e) { alert(e.message); }
-  }
 
   function copyUrl(url) {
     navigator.clipboard.writeText(url);
