@@ -67,7 +67,7 @@ export default function DashboardHome() {
         supabase.from('visits').select('*', { count: 'exact', head: true }).eq('date', today),
         supabase.from('pwa_installs').select('*', { count: 'exact', head: true }),
         supabase.from('content').select('*', { count: 'exact', head: true }),
-        supabase.from('users').select('is_online').eq('is_online', true).gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString()),
+        supabase.from('users').select('is_online').eq('is_online', true),
         supabase.from('content').select('id, head, content_type, created_at').order('created_at', { ascending: false }).limit(5),
         getSupabaseUsage(),
         getCloudinaryUsage(),
@@ -89,10 +89,7 @@ export default function DashboardHome() {
     const timer = setTimeout(() => {
       const notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
       const pwaInstalled = window.matchMedia('(display-mode: standalone)').matches;
-
-      if (!notifGranted || !pwaInstalled) {
-        setShowPermission(true);
-      }
+      if (!notifGranted || !pwaInstalled) setShowPermission(true);
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -100,30 +97,30 @@ export default function DashboardHome() {
 
   const acc1 = cloud?.accounts?.find((a) => a.name === 'picha_audio');
   const acc2 = cloud?.accounts?.find((a) => a.name === 'video');
+  const acc3 = cloud?.accounts?.find((a) => a.name === 'picha_audio_dharura');
+  const acc4 = cloud?.accounts?.find((a) => a.name === 'video_dharura');
 
+  // Jumla kuu (Zote)
   const total = {
-    storage: {
-      used: (acc1?.storage?.used || 0) + (acc2?.storage?.used || 0),
-      limit: 50 * 1024 * 1024 * 1024,
-    },
-    bandwidth: {
-      used: (acc1?.bandwidth?.used || 0) + (acc2?.bandwidth?.used || 0),
-      limit: 50 * 1024 * 1024 * 1024,
-    },
-    transformations: {
-      used: (acc1?.transformations?.used || 0) + (acc2?.transformations?.used || 0),
-      limit: 50000,
-    },
-    credits: {
-      used: (acc1?.credits?.used || 0) + (acc2?.credits?.used || 0),
-      limit: 50,
-    },
+    storage: { used: (acc1?.storage?.used || 0) + (acc2?.storage?.used || 0) + (acc3?.storage?.used || 0) + (acc4?.storage?.used || 0), limit: 100 * 1024 * 1024 * 1024 },
+    bandwidth: { used: (acc1?.bandwidth?.used || 0) + (acc2?.bandwidth?.used || 0) + (acc3?.bandwidth?.used || 0) + (acc4?.bandwidth?.used || 0), limit: 100 * 1024 * 1024 * 1024 },
+    transformations: { used: (acc1?.transformations?.used || 0) + (acc2?.transformations?.used || 0) + (acc3?.transformations?.used || 0) + (acc4?.transformations?.used || 0), limit: 100000 },
+    credits: { used: (acc1?.credits?.used || 0) + (acc2?.credits?.used || 0) + (acc3?.credits?.used || 0) + (acc4?.credits?.used || 0), limit: 100 },
+  };
+
+  // Dharura
+  const dharura = {
+    storage: { used: (acc3?.storage?.used || 0) + (acc4?.storage?.used || 0), limit: 50 * 1024 * 1024 * 1024 },
+    bandwidth: { used: (acc3?.bandwidth?.used || 0) + (acc4?.bandwidth?.used || 0), limit: 50 * 1024 * 1024 * 1024 },
+    transformations: { used: (acc3?.transformations?.used || 0) + (acc4?.transformations?.used || 0), limit: 50000 },
+    credits: { used: (acc3?.credits?.used || 0) + (acc4?.credits?.used || 0), limit: 50 },
   };
 
   return (
     <div className="dashboard">
       {showPermission && <PermissionSlide onDone={() => setShowPermission(false)} />}
 
+      {/* Stats */}
       <div className="stats-grid">
         {loading ? (
           <><SkeletonStat /><SkeletonStat /><SkeletonStat /><SkeletonStat /></>
@@ -149,6 +146,7 @@ export default function DashboardHome() {
         )}
       </div>
 
+      {/* Quick Actions */}
       <div className="section">
         <div className="section-title">⚡ Vitendo vya Haraka</div>
         <div className="quick-actions">
@@ -161,6 +159,7 @@ export default function DashboardHome() {
         </div>
       </div>
 
+      {/* Recent Posts */}
       <div className="section">
         <div className="section-title">🆕 Posts za Hivi Karibuni</div>
         {loading ? (
@@ -180,22 +179,7 @@ export default function DashboardHome() {
         )}
       </div>
 
-      <div className="section">
-        <div className="monitor-group">
-          <div className="monitor-group-title backend">🟢 Backend (Supabase)</div>
-          <div className="monitors-grid">
-            {supa?.ok ? (
-              <>
-                <Monitor title="Database" icon="💾" used={supa.database.total} limit={supa.database.limit} color="#4ade80" />
-                <Monitor title="Bandwidth" icon="🌐" used={supa.bandwidth.used} limit={supa.bandwidth.limit} color="#4ade80" />
-              </>
-            ) : (
-              <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>
-            )}
-          </div>
-        </div>
-      </div>
-
+      {/* Cloudinary — dropdown */}
       <div className="section">
         <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <span>☁️ Cloudinary Storage</span>
@@ -219,9 +203,10 @@ export default function DashboardHome() {
               outline: 'none',
             }}
           >
-            <option value="zote">📦 Zote</option>
-            <option value="picha">🖼️ Picha/Audio</option>
-            <option value="video">🎬 Video</option>
+            <option value="zote">📦 Zote (100 GB)</option>
+            <option value="video">🎬 Video (25 GB)</option>
+            <option value="picha">🖼️ Picha/Audio (25 GB)</option>
+            <option value="dharura">🚨 Dharura (50 GB)</option>
           </select>
         </div>
 
@@ -236,6 +221,15 @@ export default function DashboardHome() {
               </div>
             )}
 
+            {view === 'video' && acc2 && !acc2.error && (
+              <div className="monitors-grid">
+                <Monitor title="Storage" icon="💾" used={acc2.storage.used} limit={acc2.storage.limit} color="#f59e0b" />
+                <Monitor title="Bandwidth" icon="📡" used={acc2.bandwidth.used} limit={acc2.bandwidth.limit} color="#f59e0b" />
+                <Monitor title="Transformations" icon="🔄" used={acc2.transformations.used} limit={acc2.transformations.limit} format={(n) => String(n)} color="#f59e0b" />
+                <Monitor title="Credits" icon="💳" used={acc2.credits.used} limit={acc2.credits.limit} format={(n) => Number(n).toFixed(2)} color="#f59e0b" />
+              </div>
+            )}
+
             {view === 'picha' && acc1 && !acc1.error && (
               <div className="monitors-grid">
                 <Monitor title="Storage" icon="💾" used={acc1.storage.used} limit={acc1.storage.limit} color="#60a5fa" />
@@ -245,12 +239,12 @@ export default function DashboardHome() {
               </div>
             )}
 
-            {view === 'video' && acc2 && !acc2.error && (
+            {view === 'dharura' && (
               <div className="monitors-grid">
-                <Monitor title="Storage" icon="💾" used={acc2.storage.used} limit={acc2.storage.limit} color="#f59e0b" />
-                <Monitor title="Bandwidth" icon="📡" used={acc2.bandwidth.used} limit={acc2.bandwidth.limit} color="#f59e0b" />
-                <Monitor title="Transformations" icon="🔄" used={acc2.transformations.used} limit={acc2.transformations.limit} format={(n) => String(n)} color="#f59e0b" />
-                <Monitor title="Credits" icon="💳" used={acc2.credits.used} limit={acc2.credits.limit} format={(n) => Number(n).toFixed(2)} color="#f59e0b" />
+                <Monitor title="Storage" icon="💾" used={dharura.storage.used} limit={dharura.storage.limit} color="#ef4444" />
+                <Monitor title="Bandwidth" icon="📡" used={dharura.bandwidth.used} limit={dharura.bandwidth.limit} color="#ef4444" />
+                <Monitor title="Transformations" icon="🔄" used={dharura.transformations.used} limit={dharura.transformations.limit} format={(n) => String(n)} color="#ef4444" />
+                <Monitor title="Credits" icon="💳" used={dharura.credits.used} limit={dharura.credits.limit} format={(n) => Number(n).toFixed(2)} color="#ef4444" />
               </div>
             )}
           </>

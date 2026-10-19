@@ -36,6 +36,12 @@ jobs:
           VITE_CLOUDINARY_CLOUD_2: ${{ secrets.VITE_CLOUDINARY_CLOUD_2 }}
           VITE_CLOUDINARY_PRESET_2: ${{ secrets.VITE_CLOUDINARY_PRESET_2 }}
           VITE_CLOUDINARY_FOLDER_2: ${{ secrets.VITE_CLOUDINARY_FOLDER_2 }}
+          VITE_CLOUDINARY_CLOUD_3: ${{ secrets.VITE_CLOUDINARY_CLOUD_3 }}
+          VITE_CLOUDINARY_PRESET_3: ${{ secrets.VITE_CLOUDINARY_PRESET_3 }}
+          VITE_CLOUDINARY_FOLDER_3: ${{ secrets.VITE_CLOUDINARY_FOLDER_3 }}
+          VITE_CLOUDINARY_CLOUD_4: ${{ secrets.VITE_CLOUDINARY_CLOUD_4 }}
+          VITE_CLOUDINARY_PRESET_4: ${{ secrets.VITE_CLOUDINARY_PRESET_4 }}
+          VITE_CLOUDINARY_FOLDER_4: ${{ secrets.VITE_CLOUDINARY_FOLDER_4 }}
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
