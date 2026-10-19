@@ -67,7 +67,7 @@ export default function DashboardHome() {
         supabase.from('visits').select('*', { count: 'exact', head: true }).eq('date', today),
         supabase.from('pwa_installs').select('*', { count: 'exact', head: true }),
         supabase.from('content').select('*', { count: 'exact', head: true }),
-        supabase.from('users').select('is_online').eq('is_online', true),
+        supabase.from('users').select('is_online').eq('is_online', true).gte('last_seen', new Date(Date.now() - 5 * 60 * 1000).toISOString()),
         supabase.from('content').select('id, head, content_type, created_at').order('created_at', { ascending: false }).limit(5),
         getSupabaseUsage(),
         getCloudinaryUsage(),
