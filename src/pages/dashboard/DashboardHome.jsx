@@ -72,10 +72,7 @@ export default function DashboardHome() {
           const ucRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-uploadcare-usage`, {
             headers: { 'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}` }
           });
-          if (ucRes.ok) {
-            const ucData = await ucRes.json();
-            setUploadcare(ucData);
-          }
+          if (ucRes.ok) setUploadcare(await ucRes.json());
         } catch (err) {
           console.error("Uploadcare fetch error:", err);
         }
@@ -171,15 +168,7 @@ export default function DashboardHome() {
 
       {/* Cloudinary Monitors */}
       <div className="section">
-        <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <span>☁️ Cloudinary Storage</span>
-          <select className="select" style={{ width: 'auto' }} defaultValue="1">
-            <option value="1">Account 1</option>
-            <option value="2">Account 2</option>
-            <option value="3">Account 3</option>
-            <option value="4">Account 4</option>
-          </select>
-        </div>
+        <div className="section-title">☁️ Cloudinary Storage</div>
         <div className="monitors-grid">
           {cloud?.ok ? (
             <>
