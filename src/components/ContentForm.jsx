@@ -207,7 +207,6 @@ import '../styles/pages/watakatifu.css';
           <MediaPicker label="Video" type="video" value={form.media.url || ''} onChange={(v) => setMedia('url', v)} />
         )}
 
-        )}
 
         <div className="checkbox-row">
           <input type="checkbox" id="pub" checked={form.published} onChange={(e) => set('published', e.target.checked)} />
