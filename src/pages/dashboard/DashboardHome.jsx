@@ -56,7 +56,6 @@ export default function DashboardHome() {
   const [supa, setSupa] = useState(null);
   const [cloud, setCloud] = useState(null);
   const [uploadcare, setUploadcare] = useState(null);
-  const [uploadcare, setUploadcare] = useState(null);
   const [showPermission, setShowPermission] = useState(false);
   const [view, setView] = useState('zote');
 
