@@ -102,7 +102,7 @@ export default function AudioTrimmer({ url, initialStart = 0, initialEnd = 0, on
       
       const newUrl = await uploadToUploadcare(file);
       
-      onTrim?.({ url: newUrl, start: 0, end: duration: end - start });
+      onTrim?.({ url: newUrl, start: 0, end: end - start });
       onClose?.();
       alert('Wimbo umekatwa na kupakiwa ✅');
     } catch (e) {
