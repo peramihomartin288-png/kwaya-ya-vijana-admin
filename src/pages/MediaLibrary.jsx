@@ -3,6 +3,7 @@ import Button from '../components/Button';
 import Loader from '../components/Loader';
 import { listMedia, saveMedia, deleteMedia } from '../lib/media';
 import { uploadToCloudinary, thumbUrl, fullUrl, videoUrl, audioUrl } from '../lib/cloudinary';
+import { uploadToUploadcare } from '../lib/uploadcare';
 import '../styles/pages/media-library.css';
 
 export default function MediaLibrary() {
@@ -50,8 +51,30 @@ export default function MediaLibrary() {
       for (const file of files) {
         const isVideo = file.type.startsWith('video');
         const isAudio = file.type.startsWith('audio');
+        const isImage = file.type.startsWith('image');
         const type = isVideo ? 'video' : isAudio ? 'audio' : 'image';
-        const url = await uploadToCloudinary(file, type);
+
+        // 1. Kagua ukubwa (Cloudinary ina mipaka: 10MB picha, 100MB video)
+        const sizeMB = file.size / (1024 * 1024);
+        let useUploadcare = isAudio || (isImage && sizeMB > 10) || (isVideo && sizeMB > 100);
+
+        let url = '';
+
+        if (!useUploadcare) {
+          try {
+            // Jaribu Cloudinary kwanza
+            url = await uploadToCloudinary(file, type);
+          } catch (cloudinaryError) {
+            console.warn('Cloudinary imefeli, inaruka kwenye Uploadcare...', cloudinaryError);
+            useUploadcare = true;
+          }
+        }
+
+        // 2. Kama imefeli au ni Audio/Kubwa, tumia Uploadcare
+        if (useUploadcare) {
+          url = await uploadToUploadcare(file);
+        }
+
         await saveMedia({ url, type });
       }
       await load();
