@@ -1,218 +1,141 @@
 import { useEffect, useState } from 'react';
+import Modal from './Modal';
 import Button from './Button';
 import Input from './Input';
-import Modal from './Modal';
-import Table from './Table';
 import MediaPicker from './MediaPicker';
-import { listContent, createContent, updateContent, deleteContent } from '../lib/content';
-import { thumbUrl } from '../lib/cloudinary';
-import '../styles/pages/watakatifu.css';
+import { supabase } from '../lib/supabase';
 
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function ContentForm({ title, icon, table, contentType, onClose, onSave, editing }) {
+  const [form, setForm] = useState({
+    head: '',
+    description: '',
+    media: { url: '', type: 'image', images: [] },
+    published: false,
+    meta: {},
+  });
   const [saving, setSaving] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ head: '', description: '', media: {}, published: false });
   const [error, setError] = useState('');
 
-  const isVideo = type === 'video';
-  const isMulti = mediaCount > 1;
+  useEffect(() => {
+    if (editing) {
+      setForm({
+        head: editing.head || '',
+        description: editing.description || '',
+        media: editing.media || { url: '', type: 'image', images: [] },
+        published: editing.published || false,
+        meta: editing.meta || {},
+      });
+    }
+  }, [editing]);
 
-  async function load() {
-    setLoading(true);
-    try { setData(await listContent(type)); } catch (e) { console.error(e); }
-    setLoading(false);
+  function set(key, value) {
+    setForm((f) => ({ ...f, [key]: value }));
   }
 
-  useEffect(() => { load(); }, [type]);
+  function setMedia(key, value) {
+    setForm((f) => ({ ...f, media: { ...f.media, [key]: value } }));
+  }
 
-  function set(field, value) { setForm((f) => ({ ...f, [field]: value })); }
-  function setMedia(field, value) { setForm((f) => ({ ...f, media: { ...f.media, [field]: value } })); }
-  function setMediaUrl(index, value) {
-    const urls = [...(form.media.urls || [])];
-    urls[index] = value;
-    setForm((f) => ({ ...f, media: { ...f.media, urls } }));
+  function setMeta(key, value) {
+    setForm((f) => ({ ...f, meta: { ...f.meta, [key]: value } }));
   }
 
   function addImage() {
-    const urls = [...(form.media.urls || [''])];
-    urls.push('');
-    setForm((f) => ({ ...f, media: { ...f.media, urls } }));
+    setForm((f) => ({ ...f, media: { ...f.media, images: [...(f.media.images || []), ''] } }));
+  }
+
+  function updateImage(index, value) {
+    setForm((f) => {
+      const images = [...f.media.images];
+      images[index] = value;
+      return { ...f, media: { ...f.media, images } };
+    });
   }
 
   function removeImage(index) {
-    const urls = [...(form.media.urls || [])];
-    urls.splice(index, 1);
-    if (urls.length === 0) urls.push('');
-    setForm((f) => ({ ...f, media: { ...f.media, urls } }));
-  }
-
-  function makeEmptyForm() {
-    const base = { head: '', description: '', media: {}, published: false };
-    if (isMulti) base.media.urls = [''];
-    else base.media.url = '';
-    return base;
-  }
-
-  function openNew() {
-    setEditing(null);
-    setForm(makeEmptyForm());
-    setError('');
-    setModalOpen(true);
-  }
-
-  function openEdit(row) {
-    setEditing(row);
-    setForm({
-      head: row.head || '',
-      description: row.description || '',
-      media: row.media || (isMulti ? { urls: [''] } : { url: '' }),
-      published: row.published || false,
+    setForm((f) => {
+      const images = [...f.media.images];
+      images.splice(index, 1);
+      return { ...f, media: { ...f.media, images } };
     });
-    setError('');
-    setModalOpen(true);
-  }
-
-  function validate() {
-    if (!form.head.trim()) return 'Kichwa ni lazima';
-    if (isMulti) {
-      const urls = form.media.urls || [];
-      if (urls.filter(Boolean).length === 0) return 'Weka angalau picha moja';
-    } else {
-      if (!form.media.url) return `${isVideo ? 'Video' : 'Picha'} ni lazima`;
-    }
-    return '';
   }
 
   async function handleSave() {
-    const v = validate();
-    if (v) { setError(v); return; }
-
+    if (!form.head) return setError('Kichwa ni lazima');
     setSaving(true);
+    setError('');
     try {
-      const cleanMedia = { ...form.media };
-      if (isMulti && cleanMedia.urls) cleanMedia.urls = cleanMedia.urls.filter(Boolean);
-
       const payload = {
         head: form.head,
         description: form.description,
-        content_type: type,
-        media: cleanMedia,
+        media: form.media,
         published: form.published,
+        content_type: contentType,
+        meta: form.meta,
       };
-      if (editing) await updateContent(editing.id, payload);
-      else await createContent(payload);
-      setModalOpen(false);
-      await load();
-    } catch (e) { setError(e.message); }
+
+      if (editing?.id) {
+        const { error } = await supabase.from(table).update(payload).eq('id', editing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from(table).insert([payload]);
+        if (error) throw error;
+      }
+      onSave?.();
+      onClose?.();
+    } catch (e) {
+      setError(e.message);
+    }
     setSaving(false);
   }
 
-  async function handleDelete(id) {
-    if (!confirm('Una uhakika kufuta?')) return;
-    try { await deleteContent(id); await load(); }
-    catch (e) { alert(e.message); }
-  }
-
-  function renderThumb(row) {
-    if (isMulti) {
-      const url = row.media?.urls?.[0];
-      return url
-        ? <img src={thumbUrl(url, 80)} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
-        : '—';
-    }
-    if (isVideo) return '🎬';
-    const url = row.media?.url;
-    return url
-      ? <img src={thumbUrl(url, 80)} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
-      : '—';
-  }
-
-  const columns = [
-    { key: 'thumb', label: '', width: 60, render: renderThumb },
-    { key: 'head', label: 'Kichwa' },
-    {
-      key: 'description', label: 'Maelezo',
-      render: (r) => (r.description || '').slice(0, 40) + ((r.description || '').length > 40 ? '...' : ''),
-    },
-    {
-      key: 'published', label: 'Hali', width: 100,
-      render: (r) => r.published
-        ? <span className="badge badge-green">Imechapishwa</span>
-        : <span className="badge badge-gray">Rasimu</span>,
-    },
-    {
-      key: 'actions', label: 'Vitendo', width: 140,
-      render: (r) => (
-        <div className="row-actions">
-          <Button size="sm" variant="secondary" onClick={() => openEdit(r)}>✏️</Button>
-          <Button size="sm" variant="danger" onClick={() => handleDelete(r.id)}>🗑️</Button>
-        </div>
-      ),
-    },
-  ];
+  const isVideo = form.media.type === 'video';
 
   return (
-    <div>
-      <div className="page-header">
-        <h2>{icon} {title}</h2>
-        <Button onClick={openNew} icon="➕">Ongeza Mpya</Button>
+    <Modal onClose={onClose} title={`${icon} ${editing ? 'Hariri' : 'Ongeza'} ${title}`}>
+      <div className="form-group">
+        <label className="input-label">Kichwa</label>
+        <Input value={form.head} onChange={(e) => set('head', e.target.value)} placeholder="Kichwa cha habari..." />
       </div>
 
-      <Table columns={columns} data={data} loading={loading} emptyText={`Hakuna ${title.toLowerCase()}`} />
+      <div className="form-group">
+        <label className="input-label">Maelezo</label>
+        <textarea className="input-field" rows="4" value={form.description} onChange={(e) => set('description', e.target.value)} placeholder="Maelezo..." />
+      </div>
 
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={editing ? `Hariri ${title}` : `Ongeza ${title}`}
-        size="md"
-        footer={
-          <div className="form-actions">
-            <Button variant="ghost" onClick={() => setModalOpen(false)}>Ghairi</Button>
-            <Button onClick={handleSave} loading={saving}>Hifadhi</Button>
-          </div>
-        }
-      >
-        {error && <div className="login-error">{error}</div>}
+      <div className="form-group">
+        <label className="input-label">Picha</label>
+        <MediaPicker label="Picha" type="image" value={form.media.url || ''} onChange={(v) => setMedia('url', v)} />
+      </div>
 
-        <Input label="Kichwa" value={form.head} onChange={(v) => set('head', v)} required />
-        <Input label="Maelezo" type="textarea" rows={3} value={form.description} onChange={(v) => set('description', v)} />
-
-        {!isMulti && !isVideo && (
-          <MediaPicker label="Picha" type="image" value={form.media.url || ''} onChange={(v) => setMedia('url', v)} />
-        )}
-
-        {isMulti && (
-          <div>
-            <div className="form-section-title" style={{ marginTop: 8 }}>Picha</div>
-            {(form.media.urls || ['']).map((url, i) => (
-              <div key={i} className="multi-image-row">
-                <MediaPicker
-                  label={`Picha ${i + 1}`}
-                  type="image"
-                  value={url || ''}
-                  onChange={(v) => setMediaUrl(i, v)}
-                />
-                {(form.media.urls || []).length > 1 && (
-                  <Button size="sm" variant="danger" onClick={() => removeImage(i)} type="button">🗑️ Ondoa</Button>
-                )}
-              </div>
-            ))}
-            <Button variant="secondary" onClick={addImage} type="button" icon="➕" fullWidth>Ongeza Picha</Button>
-          </div>
-        )}
-
-        {isVideo && (
-          <MediaPicker label="Video" type="video" value={form.media.url || ''} onChange={(v) => setMedia('url', v)} />
-        )}
-
-
-        <div className="checkbox-row">
-          <input type="checkbox" id="pub" checked={form.published} onChange={(e) => set('published', e.target.checked)} />
-          <label htmlFor="pub">Chapisha kwa watumiaji</label>
+      {form.media.images && form.media.images.length > 0 && (
+        <div className="form-group">
+          <label className="input-label">Picha Nyingine</label>
+          {form.media.images.map((img, i) => (
+            <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <MediaPicker type="image" value={img} onChange={(v) => updateImage(i, v)} />
+              <Button variant="danger" onClick={() => removeImage(i)}>🗑️</Button>
+            </div>
+          ))}
+          <Button variant="secondary" onClick={addImage} type="button" icon="➕" fullWidth>Ongeza Picha</Button>
         </div>
-      </Modal>
-    </div>
+      )}
+
+      {isVideo && (
+        <MediaPicker label="Video" type="video" value={form.media.url || ''} onChange={(v) => setMedia('url', v)} />
+      )}
+
+      <div className="checkbox-row">
+        <input type="checkbox" id="pub" checked={form.published} onChange={(e) => set('published', e.target.checked)} />
+        <label htmlFor="pub">Chapisha kwa watumiaji</label>
+      </div>
+
+      {error && <p className="input-error-msg">{error}</p>}
+
+      <div className="modal-actions">
+        <Button variant="secondary" onClick={onClose}>Ghairi</Button>
+        <Button onClick={handleSave} loading={saving}>Hifadhi</Button>
+      </div>
+    </Modal>
   );
 }
