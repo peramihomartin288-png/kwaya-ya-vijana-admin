@@ -125,7 +125,11 @@ export default function MediaPicker({
 
     // Kama ni Audio
     if (type === 'audio') {
-      return <audio src={value} controls preload="metadata" style={{ width: '100%', borderRadius: 8 }} />;
+      return (
+        <div style={{ padding: 12, background: 'var(--color-bg)', borderRadius: 8 }}>
+          <audio src={value} controls preload="metadata" style={{ width: '100%' }} />
+        </div>
+      );
     }
 
     return null;
@@ -179,6 +183,7 @@ export default function MediaPicker({
             loading={uploading}
             variant="secondary"
             size="sm"
+            style={{ width: '100%' }}
           >
             {uploading ? 'Inapakia...' : '📁 Chagua Faili'}
           </Button>
@@ -191,17 +196,18 @@ export default function MediaPicker({
         <div className="media-preview">
           {renderPreview()}
 
-          <div className="media-preview-actions">
+          <div className="media-preview-actions" style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             {type === 'audio' && (
               <button
                 className="media-trim-btn"
                 onClick={() => setShowTrim(!showTrim)}
                 type="button"
+                style={{ flex: 1, padding: 8, background: 'var(--color-primary)', color: 'white', borderRadius: 6, border: 'none', cursor: 'pointer' }}
               >
                 ✂️ Trim
               </button>
             )}
-            <button className="media-clear" onClick={handleClear} type="button">
+            <button className="media-clear" onClick={handleClear} type="button" style={{ padding: '8px 16px', background: 'var(--color-danger)', color: 'white', borderRadius: 6, border: 'none', cursor: 'pointer' }}>
               ✕ Ondoa
             </button>
           </div>
