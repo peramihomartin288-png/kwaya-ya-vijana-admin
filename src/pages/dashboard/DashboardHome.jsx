@@ -23,8 +23,9 @@ function formatBytes(bytes) {
   return `${(bytes / 1073741824).toFixed(2)} GB`;
 }
 
-function Monitor({ title, icon, used, limit, color }) {
+function Monitor({ title, icon, used, limit, color, format }) {
   const pct = limit ? Math.min((used / limit) * 100, 100).toFixed(2) : 0;
+  const fmt = format || formatBytes;
   return (
     <div className="monitor-card">
       <div className="monitor-header">
@@ -35,7 +36,7 @@ function Monitor({ title, icon, used, limit, color }) {
         <div className="monitor-bar-fill" style={{ width: `${pct}%`, background: color ? `linear-gradient(90deg, ${color}, ${color}cc)` : undefined }}></div>
       </div>
       <div className="monitor-values">
-        <span>{formatBytes(used)} / {formatBytes(limit)}</span>
+        <span>{fmt(used)} / {fmt(limit)}</span>
         <span>{pct}%</span>
       </div>
     </div>
@@ -50,6 +51,7 @@ export default function DashboardHome() {
   const [cloud, setCloud] = useState(null);
   const [uploadcare, setUploadcare] = useState(null);
   const [showPermission, setShowPermission] = useState(false);
+  const [cloudAccount, setCloudAccount] = useState('1');
 
   useEffect(() => {
     async function load() {
@@ -65,7 +67,7 @@ export default function DashboardHome() {
         const supaData = await getSupabaseUsage();
         setSupa(supaData);
 
-        const cloudData = await getCloudinaryUsage();
+        const cloudData = await getCloudinaryUsage(cloudAccount);
         setCloud(cloudData);
 
         try {
@@ -89,7 +91,7 @@ export default function DashboardHome() {
       if (!notifGranted) setShowPermission(true);
     }, 3000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [cloudAccount]);
 
   return (
     <div>
@@ -168,13 +170,34 @@ export default function DashboardHome() {
 
       {/* Cloudinary Monitors */}
       <div className="section">
-        <div className="section-title">☁️ Cloudinary Storage</div>
+        <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <span>☁️ Cloudinary Storage</span>
+          <select
+            className="select"
+            style={{ width: 'auto' }}
+            value={cloudAccount}
+            onChange={(e) => setCloudAccount(e.target.value)}
+          >
+            <option value="1">Account 1 (100 GB)</option>
+            <option value="2">Account 2 (100 GB)</option>
+            <option value="3">Account 3 (100 GB)</option>
+            <option value="4">Account 4 (100 GB)</option>
+          </select>
+        </div>
         <div className="monitors-grid">
           {cloud?.ok ? (
             <>
               <Monitor title="Storage" icon="💾" used={cloud.storage?.used || 0} limit={cloud.storage?.limit || 1} color="#3b82f6" />
               <Monitor title="Bandwidth" icon="🌐" used={cloud.bandwidth?.used || 0} limit={cloud.bandwidth?.limit || 1} color="#8b5cf6" />
               <Monitor title="Transformations" icon="🔄" used={cloud.transformations?.used || 0} limit={cloud.transformations?.limit || 100000} color="#ec4899" />
+              <Monitor 
+                title="Credits" 
+                icon="💳" 
+                used={cloud.credits?.used || 0} 
+                limit={cloud.credits?.limit || 100} 
+                color="#eab308" 
+                format={(v) => Number(v).toFixed(2)} 
+              />
             </>
           ) : (
             <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>
