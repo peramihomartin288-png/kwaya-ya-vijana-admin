@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import imageCompression from 'browser-image-compression';
 import { uploadToCloudinary, thumbUrl, videoUrl, audioUrl } from '../lib/cloudinary';
+import { uploadToUploadcare } from '../lib/uploadcare';
 import Button from './Button';
 import AudioTrimmer from './AudioTrimmer';
 import '../styles/components/media-picker.css';
@@ -59,7 +60,15 @@ export default function MediaPicker({
         });
       }
 
-      const url = await uploadToCloudinary(file, type);
+      let url;
+      const sizeMB = file.size / (1024 * 1024);
+      const useUploadcare = type === 'audio' || (type === 'video' && sizeMB > 100);
+      
+      if (useUploadcare) {
+        url = await uploadToUploadcare(file);
+      } else {
+        url = await uploadToCloudinary(file, type);
+      }
       onChange?.(url);
       setUrlInput(url);
     } catch (err) {
@@ -116,7 +125,7 @@ export default function MediaPicker({
 
     // Kama ni Audio
     if (type === 'audio') {
-      return <audio src={audioUrl(value)} controls />;
+      return <audio src={value} controls preload="metadata" style={{ width: '100%', borderRadius: 8 }} />;
     }
 
     return null;
