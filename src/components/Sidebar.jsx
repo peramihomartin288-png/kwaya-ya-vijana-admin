@@ -31,8 +31,6 @@ const menu = [
     items: [
       { to: '/content/single-image', label: 'Picha Moja', icon: '🖼️' },
       { to: '/content/multi-image', label: 'Picha Nyingi', icon: '🖼️🖼️' },
-      { to: '/content/single-image-music', label: 'Picha + Music', icon: '🎶' },
-      { to: '/content/multi-image-music', label: 'Picha Nyingi + Music', icon: '🎶' },
       { to: '/content/video', label: 'Video', icon: '🎬' },
     ],
   },

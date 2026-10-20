@@ -55,8 +55,6 @@ export default function Router() {
 
         <Route path="/content/single-image" element={<SingleImage />} />
         <Route path="/content/multi-image" element={<MultiImage />} />
-        <Route path="/content/single-image-music" element={<SingleImageMusic />} />
-        <Route path="/content/multi-image-music" element={<MultiImageMusic />} />
         <Route path="/content/video" element={<Video />} />
 
         <Route path="/other-content/sala" element={<Sala />} />
