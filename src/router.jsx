@@ -17,8 +17,6 @@ import Tafakari from './pages/daily-cards/Tafakari';
 
 import SingleImage from './pages/content/SingleImage';
 import MultiImage from './pages/content/MultiImage';
-import SingleImageMusic from './pages/content/SingleImageMusic';
-import MultiImageMusic from './pages/content/MultiImageMusic';
 import Video from './pages/content/Video';
 
 import Sala from './pages/other-content/Sala';
