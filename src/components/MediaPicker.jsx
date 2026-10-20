@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import imageCompression from 'browser-image-compression';
 import { uploadToCloudinary, thumbUrl, videoUrl, audioUrl } from '../lib/cloudinary';
 import { uploadToUploadcare } from '../lib/uploadcare';
+import imageCompression from 'browser-image-compression';
 import Button from './Button';
 import AudioTrimmer from './AudioTrimmer';
 import '../styles/components/media-picker.css';
