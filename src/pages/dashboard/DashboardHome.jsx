@@ -266,6 +266,33 @@ export default function DashboardHome() {
           <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>
         )}
       </div>
-    </div>
+    
+      {/* Uploadcare Usage */}
+      {uploadcare && (
+        <div className="dashboard-card" style={{ marginTop: 16, padding: 16, background: 'var(--color-card)', borderRadius: 'var(--radius-md)' }}>
+          <h3 style={{ marginBottom: 16 }}>🎵 Uploadcare (Audio & Large Files)</h3>
+          
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+              <span>💾 Storage (Accounts 5)</span>
+              <span>{formatBytes(uploadcare.storage_used)} / {formatBytes(uploadcare.storage_limit)}</span>
+            </div>
+            <div style={{ background: 'var(--color-border)', height: 8, borderRadius: 4, marginTop: 4 }}>
+              <div style={{ background: '#10b981', height: '100%', borderRadius: 4, width: `${Math.min((uploadcare.storage_used / uploadcare.storage_limit) * 100, 100)}%` }}></div>
+            </div>
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+              <span>🌐 Bandwidth (Mwezi huu)</span>
+              <span>{formatBytes(uploadcare.bandwidth_used)} / {formatBytes(uploadcare.bandwidth_limit)}</span>
+            </div>
+            <div style={{ background: 'var(--color-border)', height: 8, borderRadius: 4, marginTop: 4 }}>
+              <div style={{ background: '#f59e0b', height: '100%', borderRadius: 4, width: `${Math.min((uploadcare.bandwidth_used / uploadcare.bandwidth_limit) * 100, 100)}%` }}></div>
+            </div>
+          </div>
+        </div>
+      )}
+      </div>
   );
 }
