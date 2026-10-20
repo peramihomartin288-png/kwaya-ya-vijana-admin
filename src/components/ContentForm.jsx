@@ -8,7 +8,6 @@ import { listContent, createContent, updateContent, deleteContent } from '../lib
 import { thumbUrl } from '../lib/cloudinary';
 import '../styles/pages/watakatifu.css';
 
-export default function ContentForm({ type, title, icon, mediaCount = 1, withMusic = false }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -53,7 +52,6 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
     const base = { head: '', description: '', media: {}, published: false };
     if (isMulti) base.media.urls = [''];
     else base.media.url = '';
-    if (withMusic) base.media.music = '';
     return base;
   }
 
@@ -84,7 +82,6 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
     } else {
       if (!form.media.url) return `${isVideo ? 'Video' : 'Picha'} ni lazima`;
     }
-    if (withMusic && !form.media.music) return 'Background music ni lazima';
     return '';
   }
 
@@ -210,8 +207,6 @@ export default function ContentForm({ type, title, icon, mediaCount = 1, withMus
           <MediaPicker label="Video" type="video" value={form.media.url || ''} onChange={(v) => setMedia('url', v)} />
         )}
 
-        {withMusic && (
-          <MediaPicker label="Background Music" type="audio" value={form.media.music || ''} onChange={(v) => setMedia('music', v)} />
         )}
 
         <div className="checkbox-row">

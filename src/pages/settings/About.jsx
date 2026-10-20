@@ -55,7 +55,6 @@ export default function About() {
         <Input label="Maelezo" type="textarea" rows={6} value={form.maelezo} onChange={(v) => set('maelezo', v)} />
         <MediaPicker label="Picha" type="image" value={form.picha} onChange={(v) => set('picha', v)} />
         <MediaPicker label="Video" type="video" value={form.video_url} onChange={(v) => set('video_url', v)} />
-        <MediaPicker label="Background Music" type="audio" value={form.background_music} onChange={(v) => set('background_music', v)} />
       </div>
     </div>
   );

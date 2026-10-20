@@ -57,7 +57,6 @@ export default function IntroPage() {
         <div className="form-section-title">Maudhui</div>
         <Input label="Jina (chini ya logo)" value={form.jina} onChange={(v) => set('jina', v)} placeholder="KMCA" />
         <MediaPicker label="Logo" type="image" value={form.logo} onChange={(v) => set('logo', v)} />
-        <MediaPicker label="Background Music" type="audio" value={form.background_music} onChange={(v) => set('background_music', v)} />
       </div>
 
       <div className="form-section">

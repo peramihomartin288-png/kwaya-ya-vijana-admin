@@ -92,7 +92,6 @@ export default function Matukio() {
         <MediaPicker label="Video" type="video" value={form.video_url} onChange={(v) => set('video_url', v)} />
 
         <MediaPicker
-          label="Background Music"
           type="audio"
           value={form.background_music}
           trim={form.background_music_trim}
