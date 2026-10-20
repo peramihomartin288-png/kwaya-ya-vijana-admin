@@ -45,13 +45,12 @@ function Monitor({ title, icon, used, limit, color, format }) {
 
 export default function DashboardHome() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ visits: 0, pwa: 0, posts: 0, online: 0 });
+  const [stats, setStats] = useState({ visits: 0, pwa: 0, posts: 0 });
   const [recent, setRecent] = useState([]);
   const [supa, setSupa] = useState(null);
   const [cloud, setCloud] = useState(null);
   const [uploadcare, setUploadcare] = useState(null);
   const [showPermission, setShowPermission] = useState(false);
-  const [cloudAccount, setCloudAccount] = useState('1');
 
   useEffect(() => {
     async function load() {
@@ -67,7 +66,7 @@ export default function DashboardHome() {
         const supaData = await getSupabaseUsage();
         setSupa(supaData);
 
-        const cloudData = await getCloudinaryUsage(cloudAccount);
+        const cloudData = await getCloudinaryUsage();
         setCloud(cloudData);
 
         try {
@@ -91,15 +90,12 @@ export default function DashboardHome() {
       if (!notifGranted) setShowPermission(true);
     }, 3000);
     return () => clearTimeout(timer);
-  }, [cloudAccount]);
+  }, []);
 
   return (
     <div>
-      {/* Stats */}
       <div className="stats-grid">
-        {loading ? (
-          <><SkeletonStat /><SkeletonStat /><SkeletonStat /></>
-        ) : (
+        {loading ? <><SkeletonStat /><SkeletonStat /><SkeletonStat /></> : (
           <>
             <div className="stat-card"><span className="stat-icon">👥</span><span className="stat-value">{stats.visits}</span><span className="stat-label">Watembeleaji</span></div>
             <div className="stat-card"><span className="stat-icon">📱</span><span className="stat-value">{stats.pwa}</span><span className="stat-label">PWA Installs</span></div>
@@ -108,37 +104,24 @@ export default function DashboardHome() {
         )}
       </div>
 
-      {/* Quick Actions */}
       <div className="section">
         <div className="section-title">⚡ Vitendo vya Haraka</div>
         <div className="quick-actions">
           {quickActions.map((a) => (
-            <Link key={a.to} to={a.to} className="quick-btn">
-              <span className="icon">{a.icon}</span>
-              <span>{a.label}</span>
-            </Link>
+            <Link key={a.to} to={a.to} className="quick-btn"><span className="icon">{a.icon}</span><span>{a.label}</span></Link>
           ))}
         </div>
       </div>
 
-      {/* Recent Posts */}
       <div className="section">
         <div className="section-title">🆕 Posts za Hivi Karibuni</div>
-        {loading ? (
-          <div className="skeleton skeleton-line" style={{ width: '100%' }}></div>
-        ) : recent.length === 0 ? (
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Hakuna posts bado</p>
-        ) : (
-          recent.map((r) => (
-            <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--color-border)', fontSize: '0.9rem' }}>
-              <span>{r.head}</span>
-              <span className="badge badge-gray">{r.content_type}</span>
-            </div>
-          ))
-        )}
+        {loading ? <div className="skeleton skeleton-line" style={{ width: '100%' }}></div> : recent.length === 0 ? <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Hakuna posts bado</p> : recent.map((r) => (
+          <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--color-border)', fontSize: '0.9rem' }}>
+            <span>{r.head}</span><span className="badge badge-gray">{r.content_type}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Supabase Monitors */}
       <div className="section">
         <div className="section-title">🗄️ Supabase (Backend)</div>
         <div className="monitors-grid">
@@ -147,13 +130,10 @@ export default function DashboardHome() {
               <Monitor title="Database" icon="💾" used={supa.database?.total || 0} limit={supa.database?.limit || 536870912} color="#4ade80" />
               <Monitor title="Bandwidth" icon="🌐" used={supa.bandwidth?.used || 0} limit={supa.bandwidth?.limit || 5368709120} color="#4ade80" />
             </>
-          ) : (
-            <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>
-          )}
+          ) : <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>}
         </div>
       </div>
 
-      {/* Uploadcare Monitors */}
       <div className="section">
         <div className="section-title">🎵 Uploadcare (Audio & Large Files)</div>
         <div className="monitors-grid">
@@ -162,48 +142,25 @@ export default function DashboardHome() {
               <Monitor title="Storage (5 Accounts)" icon="💾" used={uploadcare.storage_used} limit={uploadcare.storage_limit} color="#10b981" />
               <Monitor title="Bandwidth (Mwezi huu)" icon="🌐" used={uploadcare.bandwidth_used} limit={uploadcare.bandwidth_limit} color="#f59e0b" />
             </>
-          ) : (
-            <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>
-          )}
+          ) : <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>}
         </div>
       </div>
 
-      {/* Cloudinary Monitors */}
-      <div className="section">
-        <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <span>☁️ Cloudinary Storage</span>
-          <select
-            className="select"
-            style={{ width: 'auto' }}
-            value={cloudAccount}
-            onChange={(e) => setCloudAccount(e.target.value)}
-          >
-            <option value="1">Account 1 (100 GB)</option>
-            <option value="2">Account 2 (100 GB)</option>
-            <option value="3">Account 3 (100 GB)</option>
-            <option value="4">Account 4 (100 GB)</option>
-          </select>
-        </div>
-        <div className="monitors-grid">
-          {cloud?.ok ? (
-            <>
-              <Monitor title="Storage" icon="💾" used={cloud.storage?.used || 0} limit={cloud.storage?.limit || 1} color="#3b82f6" />
-              <Monitor title="Bandwidth" icon="🌐" used={cloud.bandwidth?.used || 0} limit={cloud.bandwidth?.limit || 1} color="#8b5cf6" />
-              <Monitor title="Transformations" icon="🔄" used={cloud.transformations?.used || 0} limit={cloud.transformations?.limit || 100000} color="#ec4899" />
-              <Monitor 
-                title="Credits" 
-                icon="💳" 
-                used={cloud.credits?.used || 0} 
-                limit={cloud.credits?.limit || 100} 
-                color="#eab308" 
-                format={(v) => Number(v).toFixed(2)} 
-              />
-            </>
+      {cloud?.accounts && cloud.accounts.map((acc, index) => (
+        <div className="section" key={index}>
+          <div className="section-title">☁️ Cloudinary: {acc.label}</div>
+          {acc.error ? (
+            <p style={{ color: 'var(--color-danger)' }}>Kosa: {acc.error}</p>
           ) : (
-            <p style={{ color: 'var(--color-text-muted)' }}>Inapakia...</p>
+            <div className="monitors-grid">
+              <Monitor title="Storage" icon="💾" used={acc.storage?.used || 0} limit={acc.storage?.limit || 1} color="#3b82f6" />
+              <Monitor title="Bandwidth" icon="🌐" used={acc.bandwidth?.used || 0} limit={acc.bandwidth?.limit || 1} color="#8b5cf6" />
+              <Monitor title="Transformations" icon="🔄" used={acc.transformations?.used || 0} limit={acc.transformations?.limit || 25000} color="#ec4899" />
+              <Monitor title="Credits" icon="💳" used={acc.credits?.used || 0} limit={acc.credits?.limit || 25} color="#eab308" format={(v) => Number(v).toFixed(2)} />
+            </div>
           )}
         </div>
-      </div>
+      ))}
 
       {showPermission && <PermissionSlide onDone={() => setShowPermission(false)} />}
     </div>
